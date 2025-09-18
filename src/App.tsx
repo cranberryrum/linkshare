@@ -1,17 +1,35 @@
 import React from 'react'
+import { LinkProvider } from './contexts/LinkContext'
+import { Header } from './components/Header'
+import { Footer } from './components/Footer'
+import { MainContent } from './components/MainContent'
+import { Toaster } from 'sonner'
 
 function App() {
   return (
-    <div className="min-h-screen bg-app-background">
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-app-text-primary mb-4">
-          Linkshare.live
-        </h1>
-        <p className="text-app-text-secondary">
-          Share links and text easily
-        </p>
+    <LinkProvider>
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-grow flex items-center justify-center p-4">
+          <MainContent />
+        </main>
+        <Footer />
+        <Toaster 
+          position="bottom-right"
+          toastOptions={{
+            style: {
+              background: 'white',
+              border: '1px solid #E3E3E3',
+              borderRadius: '12px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+              padding: '12px 16px'
+            },
+            className: 'my-toast-class'
+          }}
+          closeButton
+        />
       </div>
-    </div>
+    </LinkProvider>
   )
 }
 

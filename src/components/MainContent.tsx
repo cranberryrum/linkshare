@@ -38,15 +38,15 @@ export const MainContent: React.FC = () => {
   }, [getLink])
 
   return (
-    <div className="container-app w-full min-h-[500px]">
-      <div className="mb-8 bg-gray-100 p-1.5 rounded-full max-w-md mx-auto">
+    <div className="max-w-md mx-auto p-4 w-full min-h-[500px]">
+      <div className="mb-8 bg-gray-100 p-1 rounded-2xl max-w-sm mx-auto">
         <div className="grid grid-cols-2 gap-2">
           <button
             className={`
-              py-3 px-6 rounded-full font-medium transition-all duration-300
+              py-2 px-4 rounded-xl font-medium transition-all duration-300 text-sm
               ${activeTab === 'drop' 
-                ? 'bg-white text-app-text-primary shadow-sm' 
-                : 'text-app-text-secondary hover:text-app-text-primary'
+                ? 'bg-white text-gray-900 shadow-sm' 
+                : 'text-gray-600 hover:text-gray-900'
               }
             `}
             onClick={() => handleTabChange('drop')}
@@ -55,10 +55,10 @@ export const MainContent: React.FC = () => {
           </button>
           <button
             className={`
-              py-3 px-6 rounded-full font-medium transition-all duration-300
+              py-2 px-4 rounded-xl font-medium transition-all duration-300 text-sm
               ${activeTab === 'retrieve' 
-                ? 'bg-white text-app-text-primary shadow-sm' 
-                : 'text-app-text-secondary hover:text-app-text-primary'
+                ? 'bg-white text-gray-900 shadow-sm' 
+                : 'text-gray-600 hover:text-gray-900'
               }
             `}
             onClick={() => handleTabChange('retrieve')}

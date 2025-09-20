@@ -81,13 +81,13 @@ export const RetrieveForm: React.FC<RetrieveFormProps> = ({ initialCode }) => {
   return (
     <>
       <div className="card p-6 w-full animate-scale-in">
-        <h2 className="text-xl font-semibold mb-4">Retrieve a Link or Message</h2>
+        <h2 className="text-lg font-semibold mb-6 text-gray-900">Retrieve a Link or Message</h2>
         
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <input
               type="text"
-              className="input-field"
+              className="input-field text-sm"
               placeholder="Enter the 4-digit code (e.g., 1234)"
               value={code}
               onChange={(e) => setCode(e.target.value)}
@@ -95,16 +95,16 @@ export const RetrieveForm: React.FC<RetrieveFormProps> = ({ initialCode }) => {
               required
             />
             {error && (
-              <p className="mt-2 text-red-500 text-sm">{error}</p>
+              <p className="mt-2 text-red-500 text-xs">{error}</p>
             )}
           </div>
           
           <button
             type="submit"
-            className="btn btn-primary w-full flex items-center justify-center"
+            className="btn btn-primary w-full flex items-center justify-center text-sm"
             disabled={!code.trim()}
           >
-            <Search className="h-5 w-5 mr-2" />
+            <Search className="h-4 w-4 mr-2" />
             Retrieve
           </button>
         </form>

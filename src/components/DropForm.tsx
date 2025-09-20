@@ -88,31 +88,31 @@ export const DropForm: React.FC = () => {
 
   return (
     <div className="card p-6 w-full animate-scale-in">
-      <h2 className="text-xl font-semibold mb-4">Drop a Link or Message</h2>
+      <h2 className="text-lg font-semibold mb-6 text-gray-900">Drop a Link or Message</h2>
       
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <textarea
-            className="input-field min-h-[100px] resize-none"
+            className="input-field min-h-[120px] resize-none text-sm"
             placeholder="Paste a URL or type a message..."
             value={content}
             onChange={(e) => setContent(e.target.value)}
             maxLength={400}
             required
           />
-          <div className="text-right mt-1 text-app-text-secondary text-sm">
+          <div className="text-right mt-2 text-gray-500 text-xs">
             {content.length}/400 characters
           </div>
         </div>
         
         <button
           type="submit"
-          className={`btn btn-primary w-full flex items-center justify-center ${
+          className={`btn btn-primary w-full flex items-center justify-center text-sm ${
             content.trim() ? '' : 'opacity-50 cursor-not-allowed'
           }`}
           disabled={!content.trim()}
         >
-          <Send className="h-5 w-5 mr-2 shrink-0" />
+          <Send className="h-4 w-4 mr-2 shrink-0" />
           Drop It
         </button>
       </form>

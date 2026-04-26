@@ -15,7 +15,7 @@ export const QRModal: React.FC<QRModalProps> = ({ isOpen, onClose, code }) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
-      <div className="bg-white rounded-app max-w-xs w-full p-6 relative animate-scale-in">
+      <div className="bg-white rounded-2xl max-w-xs w-full p-6 border border-gray-200 relative animate-scale-in">
         <button
           onClick={onClose}
           className="absolute right-4 top-4 text-gray-400 hover:text-gray-600 transition-colors"

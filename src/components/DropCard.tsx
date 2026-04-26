@@ -25,7 +25,7 @@ export const DropCard: React.FC<DropCardProps> = ({
 
   return (
     <>
-      <div className="bg-white/90 backdrop-blur-sm rounded-app-button p-4 border border-app-border mb-3">
+      <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-4 border border-gray-200 mb-3">
         <div className="flex justify-between items-start mb-2">
           <span className="font-medium text-app-blue">{id}</span>
           <div className="flex items-center space-x-2">

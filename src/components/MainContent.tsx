@@ -44,8 +44,8 @@ export const MainContent: React.FC = () => {
           <button
             className={`
               py-2 px-4 rounded-xl font-medium transition-all duration-300 text-sm
-              ${activeTab === 'drop' 
-                ? 'bg-white text-gray-900 shadow-sm' 
+              ${activeTab === 'drop'
+                ? 'bg-white text-gray-900'
                 : 'text-gray-600 hover:text-gray-900'
               }
             `}
@@ -56,8 +56,8 @@ export const MainContent: React.FC = () => {
           <button
             className={`
               py-2 px-4 rounded-xl font-medium transition-all duration-300 text-sm
-              ${activeTab === 'retrieve' 
-                ? 'bg-white text-gray-900 shadow-sm' 
+              ${activeTab === 'retrieve'
+                ? 'bg-white text-gray-900'
                 : 'text-gray-600 hover:text-gray-900'
               }
             `}

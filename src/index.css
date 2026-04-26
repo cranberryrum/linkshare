@@ -19,11 +19,11 @@
   }
 
   .card {
-    @apply bg-white rounded-2xl border border-gray-200 shadow-sm backdrop-blur-sm transition-all duration-200 overflow-hidden;
+    @apply bg-white rounded-2xl border border-gray-200 backdrop-blur-sm transition-all duration-200 overflow-hidden;
   }
 
   .card:hover {
-    @apply shadow-md;
+    @apply bg-white;
   }
 
   .input-field {

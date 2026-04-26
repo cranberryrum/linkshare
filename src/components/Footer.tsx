@@ -51,7 +51,7 @@ export const Footer: React.FC = () => {
 
       {showModal && (
         <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-lg relative animate-scale-in">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 border border-gray-200 relative animate-scale-in">
             <button 
               onClick={() => setShowModal(false)}
               className="absolute right-4 top-4 text-gray-400 hover:text-gray-600 transition-colors"

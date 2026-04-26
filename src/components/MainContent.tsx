@@ -39,11 +39,11 @@ export const MainContent: React.FC = () => {
 
   return (
     <div className="max-w-md mx-auto p-4 w-full min-h-[500px]">
-      <div className="mb-8 bg-gray-100 p-1 rounded-2xl max-w-sm mx-auto">
-        <div className="grid grid-cols-2 gap-2">
+      <div className="mb-8 bg-gray-100 p-1 rounded-full w-full">
+        <div className="grid grid-cols-2 gap-1">
           <button
             className={`
-              py-2 px-4 rounded-xl font-medium transition-all duration-300 text-sm
+              py-3 px-6 rounded-full font-medium transition-all duration-300 text-base
               ${activeTab === 'drop'
                 ? 'bg-white text-gray-900'
                 : 'text-gray-600 hover:text-gray-900'
@@ -55,7 +55,7 @@ export const MainContent: React.FC = () => {
           </button>
           <button
             className={`
-              py-2 px-4 rounded-xl font-medium transition-all duration-300 text-sm
+              py-3 px-6 rounded-full font-medium transition-all duration-300 text-base
               ${activeTab === 'retrieve'
                 ? 'bg-white text-gray-900'
                 : 'text-gray-600 hover:text-gray-900'

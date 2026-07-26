@@ -10,7 +10,7 @@ function App() {
     <LinkProvider>
       <div className="min-h-screen flex flex-col">
         <Header />
-        <main className="flex-grow flex items-center justify-center px-4 py-6">
+        <main className="flex-grow flex items-center justify-center px-4 py-6 overflow-visible">
           <MainContent />
         </main>
         <Footer />

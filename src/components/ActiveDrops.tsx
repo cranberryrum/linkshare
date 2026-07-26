@@ -43,7 +43,7 @@ export const ActiveDrops: React.FC<ActiveDropsProps> = ({
   }
 
   return (
-    <div className="mt-8">
+    <div className="mt-8 overflow-visible">
       <h3 className="text-subheading mb-2">
         {showOnlyReceived ? 'Recently Received' : 'Active Drops'}
       </h3>

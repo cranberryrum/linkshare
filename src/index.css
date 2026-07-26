@@ -112,7 +112,7 @@
   }
 
   .card {
-    @apply material-elevated rounded-app overflow-hidden p-6 w-full;
+    @apply material-elevated rounded-app p-6 w-full;
     max-width: 100%;
     min-width: 0;
     transition: box-shadow var(--duration-ui) var(--ease-out);
@@ -283,25 +283,32 @@
     @apply text-app-text-primary;
   }
 
-  /* Tab panels — opacity only, no remount, no scale (frequent action) */
+  /* Tab panels — opacity only, no remount, no scale (frequent action).
+     Padding + negative margin give room for card shadows without
+     shifting layout; keep overflow visible so shadows aren't clipped. */
   .panel-container {
     display: grid;
     min-width: 0;
     max-width: 100%;
+    overflow: visible;
+    padding: 12px;
+    margin: -12px;
   }
 
   .panel {
     grid-area: 1 / 1;
     opacity: 0;
+    visibility: hidden;
     pointer-events: none;
     min-width: 0;
     max-width: 100%;
-    overflow: hidden;
+    overflow: visible;
     transition: opacity 150ms var(--ease-out);
   }
 
   .panel[data-active='true'] {
     opacity: 1;
+    visibility: visible;
     pointer-events: auto;
   }
 
@@ -334,7 +341,7 @@
     border: 1px solid rgba(0, 0, 0, 0.06);
     min-width: 0;
     max-width: 100%;
-    overflow: hidden;
+    overflow: visible;
     transition: opacity 180ms var(--ease-out),
       transform 180ms var(--ease-out),
       box-shadow var(--duration-ui) var(--ease-out);
@@ -392,7 +399,8 @@
     filter: blur(0);
     min-width: 0;
     max-width: 100%;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: visible;
     transition: opacity 180ms var(--ease-out), filter 180ms var(--ease-out);
   }
 

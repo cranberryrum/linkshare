@@ -39,7 +39,7 @@ export const MainContent: React.FC = () => {
   }, [getLink])
 
   return (
-    <div className="max-w-md mx-auto w-full min-w-0 min-h-[480px]">
+    <div className="max-w-md mx-auto w-full min-w-0 min-h-[480px] overflow-visible">
       <div className="mb-8 segmented-control" role="tablist" aria-label="Share mode">
         <div
           className="segmented-indicator"

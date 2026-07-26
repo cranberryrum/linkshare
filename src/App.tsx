@@ -10,21 +10,23 @@ function App() {
     <LinkProvider>
       <div className="min-h-screen flex flex-col">
         <Header />
-        <main className="flex-grow flex items-center justify-center p-4">
+        <main className="flex-grow flex items-center justify-center px-4 py-6">
           <MainContent />
         </main>
         <Footer />
-        <Toaster 
-          position="bottom-right"
+        <Toaster
+          position="bottom-center"
           toastOptions={{
             style: {
-              background: 'white',
-              border: '1px solid #E3E3E3',
+              background: 'rgba(255, 255, 255, 0.92)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              border: '1px solid rgba(0, 0, 0, 0.08)',
               borderRadius: '12px',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-              padding: '12px 16px'
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
+              padding: '12px 16px',
+              fontSize: '14px',
             },
-            className: 'my-toast-class'
           }}
           closeButton
         />

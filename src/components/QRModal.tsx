@@ -1,6 +1,6 @@
 import React from 'react'
-import { X } from 'lucide-react'
 import QRCode from 'react-qr-code'
+import { Modal, ModalClose } from './Modal'
 
 interface QRModalProps {
   isOpen: boolean
@@ -9,22 +9,21 @@ interface QRModalProps {
 }
 
 export const QRModal: React.FC<QRModalProps> = ({ isOpen, onClose, code }) => {
-  if (!isOpen) return null
-
   const qrValue = `${window.location.origin}/?code=${code}`
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
-      <div className="bg-white rounded-app max-w-xs w-full p-6 relative animate-scale-in">
-        <button
-          onClick={onClose}
-          className="absolute right-4 top-4 text-gray-400 hover:text-gray-600 transition-colors"
-        >
-          <X className="h-5 w-5" />
-        </button>
-        
-        <div className="flex flex-col items-center">
-          <h3 className="text-lg font-semibold mb-4">QR Code for {code}</h3>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      className="max-w-xs"
+      ariaLabel={`QR code for ${code}`}
+    >
+      <ModalClose onClose={onClose} />
+
+      <div className="flex flex-col items-center pt-2">
+        <h3 className="text-heading mb-1">Scan to receive</h3>
+        <p className="text-caption mb-6 tabular-nums">Code {code}</p>
+        <div className="qr-frame">
           <QRCode
             value={qrValue}
             size={200}
@@ -33,6 +32,6 @@ export const QRModal: React.FC<QRModalProps> = ({ isOpen, onClose, code }) => {
           />
         </div>
       </div>
-    </div>
+    </Modal>
   )
 }

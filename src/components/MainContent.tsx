@@ -9,6 +9,7 @@ export const MainContent: React.FC = () => {
   const { getLink } = useLinks()
 
   const handleTabChange = (tab: 'drop' | 'retrieve') => {
+    if (tab === activeTab) return
     if ('vibrate' in navigator) {
       navigator.vibrate(5)
     }
@@ -19,7 +20,7 @@ export const MainContent: React.FC = () => {
     const checkUrlCode = async () => {
       const urlParams = new URLSearchParams(window.location.search)
       const code = urlParams.get('code')
-      
+
       if (code) {
         try {
           const link = await getLink(code)
@@ -38,41 +39,51 @@ export const MainContent: React.FC = () => {
   }, [getLink])
 
   return (
-    <div className="max-w-md mx-auto p-4 w-full min-h-[500px]">
-      <div className="mb-8 bg-gray-100 p-1 rounded-2xl max-w-sm mx-auto">
-        <div className="grid grid-cols-2 gap-2">
-          <button
-            className={`
-              py-2 px-4 rounded-xl font-medium transition-all duration-300 text-sm
-              ${activeTab === 'drop' 
-                ? 'bg-white text-gray-900 shadow-sm' 
-                : 'text-gray-600 hover:text-gray-900'
-              }
-            `}
-            onClick={() => handleTabChange('drop')}
-          >
-            Drop
-          </button>
-          <button
-            className={`
-              py-2 px-4 rounded-xl font-medium transition-all duration-300 text-sm
-              ${activeTab === 'retrieve' 
-                ? 'bg-white text-gray-900 shadow-sm' 
-                : 'text-gray-600 hover:text-gray-900'
-              }
-            `}
-            onClick={() => handleTabChange('retrieve')}
-          >
-            Receive
-          </button>
-        </div>
+    <div className="max-w-md mx-auto w-full min-w-0 min-h-[480px]">
+      <div className="mb-8 segmented-control" role="tablist" aria-label="Share mode">
+        <div
+          className="segmented-indicator"
+          data-active={activeTab}
+          aria-hidden="true"
+        />
+        <button
+          role="tab"
+          aria-selected={activeTab === 'drop'}
+          className="segmented-button"
+          data-active={activeTab === 'drop'}
+          onPointerDown={() => activeTab !== 'drop' && handleTabChange('drop')}
+        >
+          Drop
+        </button>
+        <button
+          role="tab"
+          aria-selected={activeTab === 'retrieve'}
+          className="segmented-button"
+          data-active={activeTab === 'retrieve'}
+          onPointerDown={() => activeTab !== 'retrieve' && handleTabChange('retrieve')}
+        >
+          Receive
+        </button>
       </div>
 
-      {activeTab === 'drop' ? (
-        <DropForm />
-      ) : (
-        <RetrieveForm initialCode={initialCode} />
-      )}
+      <div className="panel-container">
+        <div
+          role="tabpanel"
+          aria-hidden={activeTab !== 'drop'}
+          className="panel"
+          data-active={activeTab === 'drop'}
+        >
+          <DropForm />
+        </div>
+        <div
+          role="tabpanel"
+          aria-hidden={activeTab !== 'retrieve'}
+          className="panel"
+          data-active={activeTab === 'retrieve'}
+        >
+          <RetrieveForm initialCode={initialCode} />
+        </div>
+      </div>
     </div>
   )
 }

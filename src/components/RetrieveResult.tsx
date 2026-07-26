@@ -14,10 +14,10 @@ export const RetrieveResult: React.FC<RetrieveResultProps> = ({
   content,
   code,
   expiresAt,
-  onReset
+  onReset,
 }) => {
-  const { minutes, seconds, isExpired } = useCountdown(expiresAt)
-  
+  const { minutes, seconds, isExpired, isUrgent } = useCountdown(expiresAt)
+
   const isUrl = /^(https?:\/\/)?[\w-]+(\.[\w-]+)+\.?(:\d+)?(\/\S*)?$/.test(content)
 
   const copyContent = () => {
@@ -25,9 +25,9 @@ export const RetrieveResult: React.FC<RetrieveResultProps> = ({
       if ('vibrate' in navigator) {
         navigator.vibrate(5)
       }
-      toast.success('Content copied to clipboard', { icon: '✓' })
+      toast.success('Content copied')
     }).catch(() => {
-      toast.error('Failed to copy content', { icon: '✕' })
+      toast.error('Failed to copy content')
     })
   }
 
@@ -46,7 +46,7 @@ export const RetrieveResult: React.FC<RetrieveResultProps> = ({
           href={/^https?:\/\//i.test(content) ? content : `https://${content}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-app-blue hover:underline"
+          className="text-app-blue hover:underline content-break"
         >
           {content}
         </a>
@@ -56,64 +56,61 @@ export const RetrieveResult: React.FC<RetrieveResultProps> = ({
   }
 
   return (
-    <div className="card p-6 w-full animate-scale-in">
-      <h2 className="text-lg font-semibold mb-6 text-gray-900">Retrieved Content</h2>
-      
+    <div className="card w-full animate-success">
+      <h2 className="text-heading mb-6">Retrieved Content</h2>
+
       <div className="mb-6">
-        <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 mb-3">
-          <div className="flex items-start justify-between gap-2">
-            <div className="break-words flex-grow overflow-auto max-h-[200px] pr-2 text-sm text-gray-900">
+        <div className="card-inset mb-4">
+          <div className="flex items-start gap-2 min-w-0">
+            <div className="content-break content-scroll flex-1 pr-1 text-body">
               {renderContent()}
             </div>
             <button
-              onClick={copyContent}
-              className="shrink-0 text-gray-400 hover:text-blue-500 transition-colors ml-2"
+              onPointerDown={copyContent}
+              className="btn-icon shrink-0"
               disabled={isExpired}
+              aria-label="Copy content"
             >
               <Copy className="h-4 w-4" />
             </button>
           </div>
         </div>
-        
+
         {isExpired ? (
-          <p className="text-red-500 font-medium text-xs">
+          <p className="text-app-error font-medium text-caption text-center" role="status">
             This content has expired
           </p>
         ) : (
-          <p className="text-gray-500 text-xs">
-            Expires in {minutes}:{seconds < 10 ? `0${seconds}` : seconds}
-          </p>
+          <div className="flex justify-center">
+            <span className="countdown-pill" data-urgent={isUrgent}>
+              Expires in {minutes}:{seconds < 10 ? `0${seconds}` : seconds}
+            </span>
+          </div>
         )}
       </div>
 
       {!isExpired && (
-        <div className="mb-6 bg-blue-50 p-4 rounded-xl border border-blue-200">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-blue-600 font-medium text-sm">Share this content</span>
-          </div>
-          <p className="text-xs text-gray-600">
-            Others can access this content using code: <span className="font-medium">{code}</span>
+        <div className="info-banner">
+          <p className="text-caption">
+            <span className="font-medium text-app-blue">Share this content</span>
+            {' — '}others can access it with code{' '}
+            <span className="font-semibold tabular-nums">{code}</span>
           </p>
         </div>
       )}
 
-      <div className="mb-4">
-        {isUrl && (
-          <button
-            onClick={openUrl}
-            className="btn btn-primary w-full flex items-center justify-center text-sm"
-            disabled={isExpired}
-          >
-            <ExternalLink className="h-4 w-4 mr-2 shrink-0" />
-            Open
-          </button>
-        )}
-      </div>
+      {isUrl && (
+        <button
+          onPointerDown={openUrl}
+          className="btn btn-primary w-full flex items-center justify-center mb-2"
+          disabled={isExpired}
+        >
+          <ExternalLink className="h-4 w-4 mr-2 shrink-0" />
+          Open Link
+        </button>
+      )}
 
-      <button
-        onClick={onReset}
-        className="btn btn-secondary w-full text-sm"
-      >
+      <button onPointerDown={onReset} className="btn btn-secondary w-full">
         Retrieve Another
       </button>
     </div>

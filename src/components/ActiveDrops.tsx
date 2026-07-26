@@ -8,18 +8,18 @@ interface ActiveDropsProps {
   showOnlyReceived?: boolean
 }
 
-export const ActiveDrops: React.FC<ActiveDropsProps> = ({ 
-  showOnlyOwn = false, 
-  showOnlyReceived = false 
+export const ActiveDrops: React.FC<ActiveDropsProps> = ({
+  showOnlyOwn = false,
+  showOnlyReceived = false,
 }) => {
   const { links, receivedLinks, deleteLink } = useLinks()
 
-  const linksToShow = showOnlyReceived 
+  const linksToShow = showOnlyReceived
     ? Object.entries(receivedLinks)
-        .filter(([_, link]) => link.expiresAt > Date.now())
+        .filter(([, link]) => link.expiresAt > Date.now())
         .sort((a, b) => b[1].createdAt - a[1].createdAt)
     : Object.entries(links)
-        .filter(([_, link]) => {
+        .filter(([, link]) => {
           if (showOnlyOwn && link.creatorId !== localStorage.getItem('creatorId')) {
             return false
           }
@@ -34,26 +34,20 @@ export const ActiveDrops: React.FC<ActiveDropsProps> = ({
   const handleDelete = async (code: string) => {
     try {
       await deleteLink(code)
-      toast('Drop deleted', {
-        style: { background: '#fee2e2', borderColor: '#fca5a5' },
-        icon: '🗑️'
-      })
+      toast('Drop deleted')
     } catch (error) {
       if (error instanceof Error) {
-        toast.error(error.message, {
-          style: { background: '#fee2e2', borderColor: '#fca5a5' },
-          icon: '✕'
-        })
+        toast.error(error.message)
       }
     }
   }
 
   return (
-    <div className="animate-fade-in">
-      <h3 className="text-lg font-semibold mb-3">
+    <div className="mt-8">
+      <h3 className="text-subheading mb-2">
         {showOnlyReceived ? 'Recently Received' : 'Active Drops'}
       </h3>
-      {linksToShow.map(([code, link]) => (
+      {linksToShow.map(([code, link], index) => (
         <DropCard
           key={code}
           id={code}
@@ -61,6 +55,7 @@ export const ActiveDrops: React.FC<ActiveDropsProps> = ({
           expiresAt={link.expiresAt}
           onDelete={() => handleDelete(code)}
           showDelete={!showOnlyReceived}
+          index={index}
         />
       ))}
     </div>

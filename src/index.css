@@ -254,8 +254,44 @@
 
   /* Apple-style segmented control */
   .segmented-control {
-    @apply relative grid grid-cols-2 p-1 rounded-app max-w-xs mx-auto;
+    @apply relative grid grid-cols-2 p-1 rounded-app w-full;
     background: rgba(0, 0, 0, 0.06);
+  }
+
+  /* Textarea shell with in-box character count */
+  .input-shell {
+    @apply relative w-full rounded-app-input;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    max-width: 100%;
+    min-width: 0;
+    transition:
+      border-color var(--duration-ui) var(--ease-out),
+      box-shadow var(--duration-ui) var(--ease-out),
+      background-color var(--duration-ui) var(--ease-out);
+  }
+
+  .input-shell:focus-within {
+    border-color: rgba(0, 122, 255, 0.5);
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15);
+    background: rgba(255, 255, 255, 1);
+  }
+
+  .input-shell .input-field {
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    padding-bottom: 2rem;
+  }
+
+  .input-shell .input-field:focus {
+    border: none;
+    box-shadow: none;
+    background: transparent;
+  }
+
+  .input-shell .char-count {
+    @apply absolute bottom-3 right-4 text-caption tabular-nums pointer-events-none;
   }
 
   .segmented-indicator {
@@ -284,15 +320,12 @@
   }
 
   /* Tab panels — opacity only, no remount, no scale (frequent action).
-     Padding + negative margin give room for card shadows without
-     shifting layout; keep overflow visible so shadows aren't clipped. */
+     Keep overflow visible so card shadows aren't clipped. */
   .panel-container {
     display: grid;
     min-width: 0;
     max-width: 100%;
     overflow: visible;
-    padding: 12px;
-    margin: -12px;
   }
 
   .panel {

@@ -104,17 +104,20 @@ export const DropResult: React.FC<DropResultProps> = ({
 
       <div className="content-switch mb-6">
         <div className="content-pane" aria-hidden={!isEditing}>
-          <textarea
-            className="input-field min-h-[100px] max-h-[240px] resize-none mb-2 content-break"
-            value={editContent}
-            onChange={(e) => setEditContent(e.target.value)}
-            maxLength={400}
-            autoFocus={isEditing}
-            disabled={isSaving || !isEditing}
-            tabIndex={isEditing ? 0 : -1}
-          />
-          <div className="text-right mb-4 text-caption tabular-nums">
-            {editContent.length}/400
+          <div className="input-shell mb-4">
+            <textarea
+              className="input-field min-h-[100px] max-h-[240px] resize-none content-break"
+              value={editContent}
+              onChange={(e) => setEditContent(e.target.value)}
+              maxLength={400}
+              autoFocus={isEditing}
+              disabled={isSaving || !isEditing}
+              tabIndex={isEditing ? 0 : -1}
+              aria-describedby="edit-char-count"
+            />
+            <div id="edit-char-count" className="char-count">
+              {editContent.length}/400
+            </div>
           </div>
           <div className="flex gap-2">
             <button

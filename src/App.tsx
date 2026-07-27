@@ -1,4 +1,5 @@
 import React from 'react'
+import { Agentation } from 'agentation'
 import { LinkProvider } from './contexts/LinkContext'
 import { Header } from './components/Header'
 import { Footer } from './components/Footer'
@@ -30,6 +31,9 @@ function App() {
           }}
           closeButton
         />
+        {import.meta.env.DEV && (
+          <Agentation endpoint="http://localhost:4747" />
+        )}
       </div>
     </LinkProvider>
   )

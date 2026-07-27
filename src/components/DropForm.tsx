@@ -93,18 +93,20 @@ export const DropForm: React.FC = () => {
 
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <textarea
-              className="input-field min-h-[120px] max-h-[240px] resize-none content-break"
-              placeholder="Paste a URL or type a message..."
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              maxLength={400}
-              required
-              disabled={isPending}
-              aria-describedby="char-count"
-            />
-            <div id="char-count" className="text-right mt-2 text-caption tabular-nums">
-              {content.length}/400
+            <div className="input-shell">
+              <textarea
+                className="input-field min-h-[120px] max-h-[240px] resize-none content-break"
+                placeholder="Paste a URL or type a message..."
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                maxLength={400}
+                required
+                disabled={isPending}
+                aria-describedby="char-count"
+              />
+              <div id="char-count" className="char-count">
+                {content.length}/400
+              </div>
             </div>
           </div>
 

@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Search } from 'lucide-react'
 import { useLinks } from '../contexts/LinkContext'
 import { RetrieveResult } from './RetrieveResult'
 import { ActiveDrops } from './ActiveDrops'
-import { toast } from 'sonner'
 
 interface RetrieveFormProps {
   initialCode?: string | null
@@ -17,7 +16,23 @@ export const RetrieveForm: React.FC<RetrieveFormProps> = ({ initialCode }) => {
     expiresAt: number
   } | null>(null)
   const [error, setError] = useState('')
-  const { getLink, receivedLinks } = useLinks()
+  const { getLink } = useLinks()
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  const shakeInput = () => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    inputRef.current?.animate(
+      [
+        { transform: 'translateX(0)' },
+        { transform: 'translateX(-4px)' },
+        { transform: 'translateX(4px)' },
+        { transform: 'translateX(-3px)' },
+        { transform: 'translateX(3px)' },
+        { transform: 'translateX(0)' }
+      ],
+      { duration: 300, easing: 'cubic-bezier(0.23, 1, 0.32, 1)' }
+    )
+  }
 
   useEffect(() => {
     if (initialCode) {
@@ -36,7 +51,8 @@ export const RetrieveForm: React.FC<RetrieveFormProps> = ({ initialCode }) => {
     try {
       const link = await getLink(codeValue.trim().toLowerCase())
       if (!link) {
-        setError('Code not found or link has expired')
+        setError("That code doesn't exist. Check the digits and try again.")
+        shakeInput()
         return
       }
 
@@ -47,13 +63,8 @@ export const RetrieveForm: React.FC<RetrieveFormProps> = ({ initialCode }) => {
       })
       setCode('')
     } catch (error) {
-      if (error instanceof Error) {
-        toast.error(error.message, {
-          style: { background: '#fee2e2', borderColor: '#fca5a5' },
-          icon: '✕'
-        })
-      }
-      setError('Failed to retrieve content')
+      setError(error instanceof Error ? error.message : 'Failed to retrieve content')
+      shakeInput()
     }
   }
 
@@ -86,6 +97,7 @@ export const RetrieveForm: React.FC<RetrieveFormProps> = ({ initialCode }) => {
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <input
+              ref={inputRef}
               type="text"
               className="input-field text-sm"
               placeholder="Enter the 4-digit code (e.g., 1234)"
@@ -95,7 +107,7 @@ export const RetrieveForm: React.FC<RetrieveFormProps> = ({ initialCode }) => {
               required
             />
             {error && (
-              <p className="mt-2 text-red-500 text-xs">{error}</p>
+              <p className="mt-2 text-red-500 text-xs animate-fade-in-fast">{error}</p>
             )}
           </div>
           

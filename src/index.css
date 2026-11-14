@@ -3,6 +3,10 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
   body {
     margin: 0;
     font-family: 'Figtree', sans-serif;
@@ -19,7 +23,7 @@
   }
 
   .card {
-    @apply bg-white rounded-2xl border border-gray-200 backdrop-blur-sm transition-all duration-200 overflow-hidden;
+    @apply bg-white rounded-2xl border border-gray-200 backdrop-blur-sm overflow-hidden;
   }
 
   .card:hover {
@@ -28,6 +32,7 @@
 
   .input-field {
     @apply w-full rounded-xl border border-blue-300 bg-white/90 p-4 backdrop-blur-sm transition-all duration-200 overflow-hidden placeholder-gray-400;
+    transition: border-color 200ms ease, box-shadow 200ms ease;
   }
 
   .input-field:focus {
@@ -35,7 +40,12 @@
   }
 
   .btn {
-    @apply rounded-xl px-6 py-3 font-medium transition-all duration-200;
+    @apply rounded-xl px-6 py-3 font-medium;
+    transition: transform 160ms var(--ease-out), background-color 200ms ease, box-shadow 200ms ease;
+  }
+
+  .btn:not(:disabled):active {
+    transform: scale(0.97);
   }
 
   .btn:focus {
@@ -72,24 +82,121 @@
   to { opacity: 1; }
 }
 
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
 @keyframes scaleIn {
-  from { 
-    transform: scale(0.95); 
-    opacity: 0; 
+  from {
+    transform: scale(0.95);
+    opacity: 0;
   }
-  to { 
-    transform: scale(1); 
-    opacity: 1; 
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes scaleOut {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(0.97);
+    opacity: 0;
   }
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.3s ease-in-out;
+  animation: fadeIn 300ms var(--ease-out);
+}
+
+.animate-fade-in-fast {
+  animation: fadeIn 150ms var(--ease-out);
 }
 
 .animate-scale-in {
-  animation: scaleIn 0.3s ease-in-out;
+  animation: scaleIn 300ms var(--ease-out);
 }
+
+.animate-fade-out {
+  animation: fadeOut 150ms var(--ease-out) forwards;
+}
+
+.animate-scale-out {
+  animation: scaleOut 150ms var(--ease-out) forwards;
+}
+
+/* Segmented Drop / Receive control: one pill slides between the two tabs */
+.tab-pill {
+  transition: transform 200ms var(--ease-out);
+}
+
+/* Copy -> Check icon swap, both icons stacked in the same box */
+.swap-icon {
+  transition: opacity 150ms var(--ease-out), transform 150ms var(--ease-out);
+}
+
+.swap-icon[data-visible='false'] {
+  opacity: 0;
+  transform: scale(0.8);
+}
+
+/* Drop card exit: fade + shrink, then collapse the row so cards below glide up */
+.drop-card-row {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 200ms var(--ease-out) 150ms;
+}
+
+.drop-card-row > div {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.drop-card {
+  transition: opacity 150ms var(--ease-out), transform 150ms var(--ease-out);
+}
+
+.drop-card-row.is-leaving {
+  grid-template-rows: 0fr;
+}
+
+.drop-card-row.is-leaving .drop-card {
+  opacity: 0;
+  transform: scale(0.97);
+}
+
+/* Reduced motion: keep fades so changes stay legible, drop movement and scale */
+@media (prefers-reduced-motion: reduce) {
+  .btn:not(:disabled):active {
+    transform: none;
+  }
+
+  .tab-pill {
+    transition: none;
+  }
+
+  .animate-scale-in {
+    animation-name: fadeIn;
+  }
+
+  .animate-scale-out {
+    animation-name: fadeOut;
+  }
+
+  .swap-icon[data-visible='false'],
+  .drop-card-row.is-leaving .drop-card {
+    transform: none;
+  }
+
+  .drop-card-row {
+    transition-duration: 0ms;
+  }
+}
+
 body {
   margin: 0;
   font-family: 'Figtree', sans-serif;

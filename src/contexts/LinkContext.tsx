@@ -1,12 +1,11 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react'
 import { supabase } from '../lib/supabase'
-import { generateCode, generateExpirationTime } from '../utils/codeGenerator'
 import posthog from 'posthog-js'
 
 interface Link {
   id: string
   content: string
-  expiresAt: number
+  expiresAt: number // in this device's clock (corrected for clock skew)
   createdAt: number
   creatorId: string
 }
@@ -22,6 +21,77 @@ interface LinkContextType {
 
 const LinkContext = createContext<LinkContextType | undefined>(undefined)
 
+// Row shape returned by the database functions
+interface LinkRow {
+  code: string
+  content: string
+  created_at: string
+  expires_at: string
+}
+
+interface RpcResult extends Partial<LinkRow> {
+  status: string
+  server_now?: string
+  edit_token?: string
+  links?: LinkRow[]
+}
+
+// Edit tokens live only on the creator's device: { [code]: token }
+const TOKENS_KEY = 'linkTokens'
+
+const readTokens = (): Record<string, string> => {
+  try {
+    return JSON.parse(localStorage.getItem(TOKENS_KEY) || '{}')
+  } catch {
+    return {}
+  }
+}
+
+const writeTokens = (tokens: Record<string, string>) => {
+  try {
+    localStorage.setItem(TOKENS_KEY, JSON.stringify(tokens))
+  } catch {
+    // Storage blocked (private mode etc.): links still work, just not after a reload
+  }
+}
+
+// The server owns time. Convert server timestamps into this device's clock so
+// countdowns are right even when the device clock is wrong.
+const toLocalTime = (iso: string, serverNow?: string) => {
+  const skew = serverNow ? new Date(serverNow).getTime() - Date.now() : 0
+  return new Date(iso).getTime() - skew
+}
+
+const toLink = (row: LinkRow, serverNow: string | undefined, creatorId: string): Link => ({
+  id: row.code,
+  content: row.content,
+  expiresAt: toLocalTime(row.expires_at, serverNow),
+  createdAt: toLocalTime(row.created_at, serverNow),
+  creatorId
+})
+
+const callRpc = async (fn: string, args: Record<string, unknown>): Promise<RpcResult> => {
+  const { data, error } = await supabase.rpc(fn, args)
+  if (error || !data) {
+    console.error(`Error calling ${fn}:`, error)
+    throw new Error('Something went wrong. Please try again.')
+  }
+  return data as RpcResult
+}
+
+const CREATE_ERRORS: Record<string, string> = {
+  empty: 'Please enter something to share',
+  too_long: 'Content exceeds 400 character limit',
+  bad_duration: 'Invalid expiry time',
+  rate_limited: 'Too many drops from your network. Please wait a few minutes.',
+  no_code_available: 'All codes are busy right now. Please try again in a minute.'
+}
+
+const LOOKUP_ERRORS: Record<string, string> = {
+  expired: 'This link has expired. Ask for a new code.',
+  rate_limited: 'Too many attempts from your network. Please wait a few minutes.'
+}
+
 export const LinkProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [links, setLinks] = useState<Record<string, Link>>({})
   const [receivedLinks, setReceivedLinks] = useState<Record<string, Link>>({})
@@ -32,30 +102,29 @@ export const LinkProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     posthog.identify(creatorId)
   }, [creatorId])
 
+  // Load this device's own active links using the tokens it holds
   useEffect(() => {
     const loadLinks = async () => {
-      const { data, error } = await supabase
-        .from('links')
-        .select('*')
-        .eq('creator_id', creatorId)
-        .gt('expires_at', new Date().toISOString())
+      const tokens = readTokens()
+      const codes = Object.keys(tokens)
+      if (codes.length === 0) return
 
-      if (error) {
+      try {
+        const result = await callRpc('get_my_links', {
+          p_codes: codes,
+          p_tokens: codes.map(code => tokens[code])
+        })
+        const linksMap: Record<string, Link> = {}
+        result.links?.forEach(row => {
+          linksMap[row.code] = toLink(row, result.server_now, creatorId)
+        })
+        setLinks(linksMap)
+
+        // Forget tokens for links that are gone
+        writeTokens(Object.fromEntries(Object.keys(linksMap).map(code => [code, tokens[code]])))
+      } catch (error) {
         console.error('Error loading links:', error)
-        return
       }
-
-      const linksMap: Record<string, Link> = {}
-      data.forEach(link => {
-        linksMap[link.id] = {
-          id: link.id,
-          content: link.content,
-          expiresAt: new Date(link.expires_at).getTime(),
-          createdAt: new Date(link.created_at).getTime(),
-          creatorId: link.creator_id
-        }
-      })
-      setLinks(linksMap)
     }
 
     loadLinks()
@@ -67,76 +136,38 @@ export const LinkProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       throw new Error('Maximum limit of 5 active drops reached')
     }
 
-    let code = generateCode()
-    while (links[code]) {
-      code = generateCode()
+    const result = await callRpc('create_link', { p_content: content, p_minutes: 10 })
+    if (result.status !== 'ok' || !result.code || !result.edit_token) {
+      throw new Error(CREATE_ERRORS[result.status] || 'Failed to create link')
     }
 
-    const expiresAt = generateExpirationTime()
-    const { data, error } = await supabase
-      .from('links')
-      .insert([{
-        id: code,
-        content,
-        expires_at: new Date(expiresAt).toISOString(),
-        creator_id: creatorId
-      }])
-      .select()
-      .single()
+    const link = toLink(result as LinkRow, result.server_now, creatorId)
+    writeTokens({ ...readTokens(), [link.id]: result.edit_token })
+    setLinks(prev => ({ ...prev, [link.id]: link }))
 
-    if (error || !data) {
-      console.error('Error creating link:', error)
-      throw new Error('Failed to create link')
-    }
-
-    const link: Link = {
-      id: data.id,
-      content: data.content,
-      expiresAt: new Date(data.expires_at).getTime(),
-      createdAt: new Date(data.created_at).getTime(),
-      creatorId: data.creator_id
-    }
-
-    setLinks(prev => ({ ...prev, [code]: link }))
-    
     posthog.capture('link_created', {
-      code,
+      code: link.id,
       content_length: content.length,
-      expires_at: new Date(expiresAt).toISOString()
+      expires_at: result.expires_at
     })
 
     return link
   }
 
   const updateLink = async (code: string, content: string): Promise<Link | null> => {
-    const link = links[code]
-    if (!link || link.expiresAt < Date.now() || link.creatorId !== creatorId) {
+    const token = readTokens()[code]
+    if (!token || !links[code]) {
       return null
     }
 
-    const { data, error } = await supabase
-      .from('links')
-      .update({ content })
-      .eq('id', code)
-      .eq('creator_id', creatorId)
-      .select()
-      .single()
-
-    if (error || !data) {
-      console.error('Error updating link:', error)
-      throw new Error('Failed to update link')
+    const result = await callRpc('update_link', { p_code: code, p_token: token, p_content: content })
+    if (result.status !== 'ok') {
+      throw new Error(CREATE_ERRORS[result.status] || 'This link can no longer be edited')
     }
 
-    const updatedLink: Link = {
-      id: data.id,
-      content: data.content,
-      expiresAt: new Date(data.expires_at).getTime(),
-      createdAt: new Date(data.created_at).getTime(),
-      creatorId: data.creator_id
-    }
-
+    const updatedLink = toLink(result as LinkRow, result.server_now, creatorId)
     setLinks(prev => ({ ...prev, [code]: updatedLink }))
-    
+
     posthog.capture('link_updated', {
       code,
       content_length: content.length
@@ -145,54 +176,44 @@ export const LinkProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return updatedLink
   }
 
-  const getLink = async (code: string): Promise<Link | null> => {
-    const { data, error } = await supabase
-      .from('links')
-      .select('*')
-      .eq('id', code)
-      .gt('expires_at', new Date().toISOString())
-      .single()
+  // Returns null when the code doesn't exist; throws with a friendly message
+  // when it expired or the network is rate limited.
+  const getLink = useCallback(async (code: string): Promise<Link | null> => {
+    const result = await callRpc('get_link', { p_code: code })
 
-    if (error || !data) {
-      posthog.capture('link_retrieval_failed', { code })
+    if (result.status !== 'ok') {
+      posthog.capture('link_retrieval_failed', { code, reason: result.status })
+      if (LOOKUP_ERRORS[result.status]) {
+        throw new Error(LOOKUP_ERRORS[result.status])
+      }
       return null
     }
 
-    const link: Link = {
-      id: data.id,
-      content: data.content,
-      expiresAt: new Date(data.expires_at).getTime(),
-      createdAt: new Date(data.created_at).getTime(),
-      creatorId: data.creator_id
-    }
+    const isOwn = code in readTokens()
+    const link = toLink(result as LinkRow, result.server_now, isOwn ? creatorId : '')
 
-    if (data.creator_id !== creatorId) {
+    if (!isOwn) {
       setReceivedLinks(prev => ({ ...prev, [code]: link }))
-      posthog.capture('link_retrieved', { code, is_own: false })
-    } else {
-      posthog.capture('link_retrieved', { code, is_own: true })
     }
+    posthog.capture('link_retrieved', { code, is_own: isOwn })
 
     return link
-  }
+  }, [creatorId])
 
   const deleteLink = async (code: string): Promise<void> => {
-    const link = links[code]
-    if (!link || link.creatorId !== creatorId) {
+    const tokens = readTokens()
+    const token = tokens[code]
+    if (!token) {
       throw new Error('You can only delete your own links')
     }
 
-    const { error } = await supabase
-      .from('links')
-      .delete()
-      .eq('id', code)
-      .eq('creator_id', creatorId)
-
-    if (error) {
-      console.error('Error deleting link:', error)
+    const result = await callRpc('delete_link', { p_code: code, p_token: token })
+    if (result.status !== 'ok') {
       throw new Error('Failed to delete link')
     }
 
+    delete tokens[code]
+    writeTokens(tokens)
     setLinks(prev => {
       const newLinks = { ...prev }
       delete newLinks[code]

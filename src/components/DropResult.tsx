@@ -1,8 +1,9 @@
-import React, { useState, useRef } from 'react'
-import { Copy, Send, PlusCircle, Pen } from 'lucide-react'
+import React, { useState, useRef, useEffect } from 'react'
+import { PlusCircle, Pen } from 'lucide-react'
 import QRCode from 'react-qr-code'
 import { useCountdown } from '../hooks/useCountdown'
 import { toast } from 'sonner'
+import { CopyIcon } from './CopyIcon'
 
 interface DropResultProps {
   code: string
@@ -22,7 +23,10 @@ export const DropResult: React.FC<DropResultProps> = ({
   const [isEditing, setIsEditing] = useState(false)
   const [editContent, setEditContent] = useState(content)
   const { minutes, seconds, isExpired } = useCountdown(expiresAt)
-  const codeRef = useRef<HTMLDivElement>(null)
+  const [copied, setCopied] = useState(false)
+  const copiedTimer = useRef<ReturnType<typeof setTimeout>>()
+
+  useEffect(() => () => clearTimeout(copiedTimer.current), [])
 
   const copyCode = () => {
     navigator.clipboard.writeText(code).then(() => {
@@ -33,15 +37,10 @@ export const DropResult: React.FC<DropResultProps> = ({
         style: { background: '#dcfce7', borderColor: '#86efac' },
         icon: '✓'
       })
-      
-      if (codeRef.current) {
-        codeRef.current.classList.add('bg-green-50')
-        setTimeout(() => {
-          if (codeRef.current) {
-            codeRef.current.classList.remove('bg-green-50')
-          }
-        }, 500)
-      }
+
+      setCopied(true)
+      clearTimeout(copiedTimer.current)
+      copiedTimer.current = setTimeout(() => setCopied(false), 1500)
     }).catch(() => {
       toast.error('Failed to copy code', {
         style: { background: '#fee2e2', borderColor: '#fca5a5' },
@@ -70,10 +69,7 @@ export const DropResult: React.FC<DropResultProps> = ({
   return (
     <div className="card p-6 w-full animate-scale-in">
       <div className="flex items-center justify-between mb-6">
-        <div 
-          ref={codeRef}
-          className="text-5xl font-bold text-app-blue tracking-wider py-2 rounded-app-button transition-colors duration-200"
-        >
+        <div className="text-5xl font-bold text-app-blue tracking-wider py-2 rounded-app-button">
           {code}
         </div>
         <button
@@ -81,7 +77,7 @@ export const DropResult: React.FC<DropResultProps> = ({
           className="btn btn-secondary flex items-center justify-center px-4 py-2 h-10"
           disabled={isExpired}
         >
-          <Copy className="h-5 w-5 shrink-0" />
+          <CopyIcon copied={copied} className="h-5 w-5 shrink-0" />
         </button>
       </div>
 

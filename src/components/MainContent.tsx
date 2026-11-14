@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { DropForm } from './DropForm'
 import { RetrieveForm } from './RetrieveForm'
-import { useLinks } from '../contexts/LinkContext'
 
 export const MainContent: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'drop' | 'retrieve'>('drop')
   const [initialCode, setInitialCode] = useState<string | null>(null)
-  const { getLink } = useLinks()
 
   const handleTabChange = (tab: 'drop' | 'retrieve') => {
     if ('vibrate' in navigator) {
@@ -15,37 +13,31 @@ export const MainContent: React.FC = () => {
     setActiveTab(tab)
   }
 
+  // ?code=1234 (from a QR scan): open the retrieve tab and let RetrieveForm do
+  // the single lookup, so it shows any error and isn't counted twice.
   useEffect(() => {
-    const checkUrlCode = async () => {
-      const urlParams = new URLSearchParams(window.location.search)
-      const code = urlParams.get('code')
-      
-      if (code) {
-        try {
-          const link = await getLink(code)
-          if (link) {
-            setActiveTab('retrieve')
-            setInitialCode(code)
-            window.history.replaceState({}, '', window.location.pathname)
-          }
-        } catch (error) {
-          console.error('Error checking code from URL:', error)
-        }
-      }
+    const code = new URLSearchParams(window.location.search).get('code')
+    if (code) {
+      setActiveTab('retrieve')
+      setInitialCode(code)
+      window.history.replaceState({}, '', window.location.pathname)
     }
-
-    checkUrlCode()
-  }, [getLink])
+  }, [])
 
   return (
     <div className="max-w-md mx-auto p-4 w-full min-h-[500px]">
       <div className="mb-8 bg-gray-100 p-1 rounded-full w-full">
-        <div className="grid grid-cols-2 gap-1">
+        <div className="relative grid grid-cols-2 gap-1">
+          <div
+            aria-hidden
+            className="tab-pill absolute inset-y-0 left-0 w-[calc(50%-2px)] rounded-full bg-white"
+            style={{ transform: activeTab === 'drop' ? 'translateX(0)' : 'translateX(calc(100% + 4px))' }}
+          />
           <button
             className={`
-              py-3 px-6 rounded-full font-medium transition-all duration-300 text-base
+              relative py-3 px-6 rounded-full font-medium transition-colors duration-200 text-base
               ${activeTab === 'drop'
-                ? 'bg-white text-gray-900'
+                ? 'text-gray-900'
                 : 'text-gray-600 hover:text-gray-900'
               }
             `}
@@ -55,9 +47,9 @@ export const MainContent: React.FC = () => {
           </button>
           <button
             className={`
-              py-3 px-6 rounded-full font-medium transition-all duration-300 text-base
+              relative py-3 px-6 rounded-full font-medium transition-colors duration-200 text-base
               ${activeTab === 'retrieve'
-                ? 'bg-white text-gray-900'
+                ? 'text-gray-900'
                 : 'text-gray-600 hover:text-gray-900'
               }
             `}

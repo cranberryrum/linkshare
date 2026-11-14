@@ -1,6 +1,7 @@
 import React from 'react'
 import { X } from 'lucide-react'
 import QRCode from 'react-qr-code'
+import { usePresence } from '../hooks/usePresence'
 
 interface QRModalProps {
   isOpen: boolean
@@ -9,13 +10,18 @@ interface QRModalProps {
 }
 
 export const QRModal: React.FC<QRModalProps> = ({ isOpen, onClose, code }) => {
-  if (!isOpen) return null
+  const { isMounted, isClosing, onExitEnd } = usePresence(isOpen)
+
+  if (!isMounted) return null
 
   const qrValue = `${window.location.origin}/?code=${code}`
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
-      <div className="bg-white rounded-2xl max-w-xs w-full p-6 border border-gray-200 relative animate-scale-in">
+    <div
+      className={`fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 ${isClosing ? 'animate-fade-out' : 'animate-fade-in'}`}
+      onAnimationEnd={onExitEnd}
+    >
+      <div className={`bg-white rounded-2xl max-w-xs w-full p-6 border border-gray-200 relative ${isClosing ? 'animate-scale-out' : 'animate-scale-in'}`}>
         <button
           onClick={onClose}
           className="absolute right-4 top-4 text-gray-400 hover:text-gray-600 transition-colors"

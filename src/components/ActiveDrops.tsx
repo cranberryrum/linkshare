@@ -38,6 +38,7 @@ export const ActiveDrops: React.FC<ActiveDropsProps> = ({
         style: { background: '#fee2e2', borderColor: '#fca5a5' },
         icon: '🗑️'
       })
+      return true
     } catch (error) {
       if (error instanceof Error) {
         toast.error(error.message, {
@@ -45,6 +46,7 @@ export const ActiveDrops: React.FC<ActiveDropsProps> = ({
           icon: '✕'
         })
       }
+      return false
     }
   }
 

@@ -1,8 +1,10 @@
 import React, { useState } from 'react'
 import { Heart, HelpCircle, X } from 'lucide-react'
+import { usePresence } from '../hooks/usePresence'
 
 export const Footer: React.FC = () => {
   const [showModal, setShowModal] = useState(false)
+  const { isMounted, isClosing, onExitEnd } = usePresence(showModal)
 
   const handleHowItWorks = () => {
     if ('vibrate' in navigator) {
@@ -49,9 +51,12 @@ export const Footer: React.FC = () => {
         </div>
       </footer>
 
-      {showModal && (
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 border border-gray-200 relative animate-scale-in">
+      {isMounted && (
+        <div
+          className={`fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center p-4 z-50 ${isClosing ? 'animate-fade-out' : 'animate-fade-in'}`}
+          onAnimationEnd={onExitEnd}
+        >
+          <div className={`bg-white rounded-2xl max-w-md w-full p-6 border border-gray-200 relative ${isClosing ? 'animate-scale-out' : 'animate-scale-in'}`}>
             <button 
               onClick={() => setShowModal(false)}
               className="absolute right-4 top-4 text-gray-400 hover:text-gray-600 transition-colors"

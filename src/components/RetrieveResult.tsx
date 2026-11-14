@@ -1,7 +1,8 @@
-import React from 'react'
-import { Copy, ExternalLink } from 'lucide-react'
+import React, { useState, useRef, useEffect } from 'react'
+import { ExternalLink } from 'lucide-react'
 import { useCountdown } from '../hooks/useCountdown'
 import { toast } from 'sonner'
+import { CopyIcon } from './CopyIcon'
 
 interface RetrieveResultProps {
   content: string
@@ -17,6 +18,10 @@ export const RetrieveResult: React.FC<RetrieveResultProps> = ({
   onReset
 }) => {
   const { minutes, seconds, isExpired } = useCountdown(expiresAt)
+  const [copied, setCopied] = useState(false)
+  const copiedTimer = useRef<ReturnType<typeof setTimeout>>()
+
+  useEffect(() => () => clearTimeout(copiedTimer.current), [])
   
   const isUrl = /^(https?:\/\/)?[\w-]+(\.[\w-]+)+\.?(:\d+)?(\/\S*)?$/.test(content)
 
@@ -25,6 +30,9 @@ export const RetrieveResult: React.FC<RetrieveResultProps> = ({
       if ('vibrate' in navigator) {
         navigator.vibrate(5)
       }
+      setCopied(true)
+      clearTimeout(copiedTimer.current)
+      copiedTimer.current = setTimeout(() => setCopied(false), 1500)
       toast.success('Content copied to clipboard', { icon: '✓' })
     }).catch(() => {
       toast.error('Failed to copy content', { icon: '✕' })
@@ -70,7 +78,7 @@ export const RetrieveResult: React.FC<RetrieveResultProps> = ({
               className="shrink-0 text-gray-400 hover:text-blue-500 transition-colors ml-2"
               disabled={isExpired}
             >
-              <Copy className="h-4 w-4" />
+              <CopyIcon copied={copied} className="h-4 w-4" />
             </button>
           </div>
         </div>

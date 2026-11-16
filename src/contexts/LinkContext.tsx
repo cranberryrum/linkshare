@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react'
 import { supabase } from '../lib/supabase'
 import posthog from 'posthog-js'
+import { getLinkMeta } from '../utils/linkMeta'
 
 interface Link {
   id: string
@@ -10,11 +11,14 @@ interface Link {
   creatorId: string
 }
 
+export type InputMethod = 'pasted' | 'typed'
+export type RetrieveVia = 'qr_link' | 'typed'
+
 interface LinkContextType {
   links: Record<string, Link>
   receivedLinks: Record<string, Link>
-  dropLink: (content: string) => Promise<Link>
-  getLink: (code: string) => Promise<Link | null>
+  dropLink: (content: string, inputMethod?: InputMethod) => Promise<Link>
+  getLink: (code: string, via?: RetrieveVia) => Promise<Link | null>
   deleteLink: (code: string) => Promise<void>
   updateLink: (code: string, content: string) => Promise<Link | null>
 }
@@ -130,7 +134,7 @@ export const LinkProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     loadLinks()
   }, [creatorId])
 
-  const dropLink = async (content: string): Promise<Link> => {
+  const dropLink = async (content: string, inputMethod: InputMethod = 'typed'): Promise<Link> => {
     const activeLinks = Object.values(links).filter(link => link.expiresAt > Date.now())
     if (activeLinks.length >= 5) {
       throw new Error('Maximum limit of 5 active drops reached')
@@ -147,8 +151,11 @@ export const LinkProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     posthog.capture('link_created', {
       code: link.id,
-      content_length: content.length,
-      expires_at: result.expires_at
+      expires_at: result.expires_at,
+      expiry_minutes: 10,
+      input_method: inputMethod,
+      active_drops: Object.keys(links).length + 1,
+      ...getLinkMeta(content)
     })
 
     return link
@@ -170,7 +177,7 @@ export const LinkProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     posthog.capture('link_updated', {
       code,
-      content_length: content.length
+      ...getLinkMeta(content)
     })
 
     return updatedLink
@@ -178,11 +185,11 @@ export const LinkProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   // Returns null when the code doesn't exist; throws with a friendly message
   // when it expired or the network is rate limited.
-  const getLink = useCallback(async (code: string): Promise<Link | null> => {
+  const getLink = useCallback(async (code: string, via: RetrieveVia = 'typed'): Promise<Link | null> => {
     const result = await callRpc('get_link', { p_code: code })
 
     if (result.status !== 'ok') {
-      posthog.capture('link_retrieval_failed', { code, reason: result.status })
+      posthog.capture('link_retrieval_failed', { code, reason: result.status, via })
       if (LOOKUP_ERRORS[result.status]) {
         throw new Error(LOOKUP_ERRORS[result.status])
       }
@@ -195,7 +202,13 @@ export const LinkProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (!isOwn) {
       setReceivedLinks(prev => ({ ...prev, [code]: link }))
     }
-    posthog.capture('link_retrieved', { code, is_own: isOwn })
+    posthog.capture('link_retrieved', {
+      code,
+      is_own: isOwn,
+      via,
+      seconds_since_created: Math.max(0, Math.round((Date.now() - link.createdAt) / 1000)),
+      ...getLinkMeta(link.content)
+    })
 
     return link
   }, [creatorId])

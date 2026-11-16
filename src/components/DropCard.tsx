@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { QrCode, Trash2 } from 'lucide-react'
 import { useCountdown } from '../hooks/useCountdown'
 import { QRModal } from './QRModal'
+import posthog from 'posthog-js'
 
 interface DropCardProps {
   id: string
@@ -52,7 +53,10 @@ export const DropCard: React.FC<DropCardProps> = ({
                 {showDelete && (
                   <>
                     <button
-                      onClick={() => setShowQR(true)}
+                      onClick={() => {
+                        setShowQR(true)
+                        posthog.capture('qr_opened', { code: id })
+                      }}
                       className="text-gray-400 hover:text-app-blue transition-colors"
                     >
                       <QrCode className="h-4 w-4" />

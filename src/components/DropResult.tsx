@@ -4,6 +4,7 @@ import QRCode from 'react-qr-code'
 import { useCountdown } from '../hooks/useCountdown'
 import { toast } from 'sonner'
 import { CopyIcon } from './CopyIcon'
+import posthog from 'posthog-js'
 
 interface DropResultProps {
   code: string
@@ -29,6 +30,7 @@ export const DropResult: React.FC<DropResultProps> = ({
   useEffect(() => () => clearTimeout(copiedTimer.current), [])
 
   const copyCode = () => {
+    posthog.capture('code_copied', { code })
     navigator.clipboard.writeText(code).then(() => {
       if ('vibrate' in navigator) {
         navigator.vibrate(5)

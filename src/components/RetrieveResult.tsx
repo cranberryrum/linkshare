@@ -3,6 +3,8 @@ import { ExternalLink } from 'lucide-react'
 import { useCountdown } from '../hooks/useCountdown'
 import { toast } from 'sonner'
 import { CopyIcon } from './CopyIcon'
+import posthog from 'posthog-js'
+import { getLinkMeta } from '../utils/linkMeta'
 
 interface RetrieveResultProps {
   content: string
@@ -26,6 +28,7 @@ export const RetrieveResult: React.FC<RetrieveResultProps> = ({
   const isUrl = /^(https?:\/\/)?[\w-]+(\.[\w-]+)+\.?(:\d+)?(\/\S*)?$/.test(content)
 
   const copyContent = () => {
+    posthog.capture('content_copied', { code, ...getLinkMeta(content) })
     navigator.clipboard.writeText(content).then(() => {
       if ('vibrate' in navigator) {
         navigator.vibrate(5)
@@ -40,6 +43,7 @@ export const RetrieveResult: React.FC<RetrieveResultProps> = ({
   }
 
   const openUrl = () => {
+    posthog.capture('content_link_opened', { code, ...getLinkMeta(content) })
     let url = content
     if (!/^https?:\/\//i.test(url)) {
       url = 'https://' + url
@@ -55,6 +59,7 @@ export const RetrieveResult: React.FC<RetrieveResultProps> = ({
           target="_blank"
           rel="noopener noreferrer"
           className="text-app-blue hover:underline"
+          onClick={() => posthog.capture('content_link_opened', { code, ...getLinkMeta(content) })}
         >
           {content}
         </a>

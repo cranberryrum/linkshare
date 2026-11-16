@@ -1,12 +1,13 @@
 import React, { useState } from 'react'
 import { Send, PlusCircle } from 'lucide-react'
-import { useLinks } from '../contexts/LinkContext'
+import { useLinks, InputMethod } from '../contexts/LinkContext'
 import { DropResult } from './DropResult'
 import { ActiveDrops } from './ActiveDrops'
 import { toast } from 'sonner'
 
 export const DropForm: React.FC = () => {
   const [content, setContent] = useState('')
+  const [inputMethod, setInputMethod] = useState<InputMethod>('typed')
   const [result, setResult] = useState<{
     code: string
     content: string
@@ -28,13 +29,14 @@ export const DropForm: React.FC = () => {
     }
 
     try {
-      const link = await dropLink(content)
+      const link = await dropLink(content, inputMethod)
       setResult({
         code: link.id,
         content: link.content,
         expiresAt: link.expiresAt
       })
       setContent('')
+      setInputMethod('typed')
     } catch (error) {
       if (error instanceof Error) {
         toast.error(error.message, {
@@ -97,6 +99,7 @@ export const DropForm: React.FC = () => {
             placeholder="Paste a URL or type a message..."
             value={content}
             onChange={(e) => setContent(e.target.value)}
+            onPaste={() => setInputMethod('pasted')}
             maxLength={400}
             required
           />

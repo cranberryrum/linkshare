@@ -49,7 +49,7 @@ export const RetrieveForm: React.FC<RetrieveFormProps> = ({ initialCode }) => {
     if (!codeValue.trim()) return
 
     try {
-      const link = await getLink(codeValue.trim().toLowerCase())
+      const link = await getLink(codeValue.trim().toLowerCase(), codeToUse ? 'qr_link' : 'typed')
       if (!link) {
         setError("That code doesn't exist. Check the digits and try again.")
         shakeInput()

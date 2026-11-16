@@ -73,7 +73,7 @@ export const Footer: React.FC = () => {
                 <h3 className="font-medium mb-2 text-gray-900 text-sm">Sharing Content</h3>
                 <ul className="list-disc list-inside text-gray-600 space-y-1 text-xs">
                   <li>Drop any link or message up to 400 characters</li>
-                  <li>Get a unique 4-digit code that expires in 10 minutes</li>
+                  <li>Get a unique 4-digit code that lasts 10 minutes, 1 hour or 1 day</li>
                   <li>Share the code or QR code with others</li>
                   <li>Maximum of 5 active drops at a time</li>
                 </ul>
@@ -83,7 +83,7 @@ export const Footer: React.FC = () => {
                 <h3 className="font-medium mb-2 text-gray-900 text-sm">Receiving Content</h3>
                 <ul className="list-disc list-inside text-gray-600 space-y-1 text-xs">
                   <li>Enter the 4-digit code to access shared content</li>
-                  <li>Content automatically expires after 10 minutes</li>
+                  <li>Content stops working when its timer runs out</li>
                   <li>Option to copy or open links directly</li>
                 </ul>
               </div>

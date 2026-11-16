@@ -181,6 +181,16 @@
   transform: scale(0.97);
 }
 
+/* Expiry bar drains smoothly between the once-a-second updates */
+.expiry-bar {
+  transition: transform 1000ms linear, background-color 300ms ease;
+}
+
+/* Code boxes: quick border/ring feedback as focus moves box to box */
+.code-box {
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
 /* Reduced motion: keep fades so changes stay legible, drop movement and scale */
 @media (prefers-reduced-motion: reduce) {
   .btn:not(:disabled):active {

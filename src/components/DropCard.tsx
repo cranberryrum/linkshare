@@ -19,7 +19,7 @@ export const DropCard: React.FC<DropCardProps> = ({
   onDelete,
   showDelete = false
 }) => {
-  const { minutes, seconds, isExpired } = useCountdown(expiresAt)
+  const { label, isExpired } = useCountdown(expiresAt)
   const [showQR, setShowQR] = useState(false)
   const [isLeaving, setIsLeaving] = useState(false)
   const [isGone, setIsGone] = useState(isExpired)
@@ -74,7 +74,7 @@ export const DropCard: React.FC<DropCardProps> = ({
             </div>
             <p className="text-sm text-app-text-secondary truncate mb-1">{content}</p>
             <p className="text-xs text-app-text-secondary">
-              Expires in {minutes}:{seconds < 10 ? `0${seconds}` : seconds}
+              Expires in {label}
             </p>
           </div>
         </div>

@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Search } from 'lucide-react'
+import { Search, Loader2 } from 'lucide-react'
 import { useLinks } from '../contexts/LinkContext'
 import { RetrieveResult } from './RetrieveResult'
 import { ActiveDrops } from './ActiveDrops'
+import { CodeInput, CodeInputHandle } from './CodeInput'
 
 interface RetrieveFormProps {
   initialCode?: string | null
@@ -10,6 +11,7 @@ interface RetrieveFormProps {
 
 export const RetrieveForm: React.FC<RetrieveFormProps> = ({ initialCode }) => {
   const [code, setCode] = useState('')
+  const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<{
     content: string
     id: string
@@ -17,54 +19,42 @@ export const RetrieveForm: React.FC<RetrieveFormProps> = ({ initialCode }) => {
   } | null>(null)
   const [error, setError] = useState('')
   const { getLink } = useLinks()
-  const inputRef = useRef<HTMLInputElement>(null)
-
-  const shakeInput = () => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    inputRef.current?.animate(
-      [
-        { transform: 'translateX(0)' },
-        { transform: 'translateX(-4px)' },
-        { transform: 'translateX(4px)' },
-        { transform: 'translateX(-3px)' },
-        { transform: 'translateX(3px)' },
-        { transform: 'translateX(0)' }
-      ],
-      { duration: 300, easing: 'cubic-bezier(0.23, 1, 0.32, 1)' }
-    )
-  }
+  const codeInput = useRef<CodeInputHandle>(null)
 
   useEffect(() => {
     if (initialCode) {
-      setCode(initialCode)
-      handleSubmit(null, initialCode)
+      const digits = initialCode.replace(/\D/g, '').slice(0, 4)
+      setCode(digits)
+      lookup(digits, 'qr_link')
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialCode])
 
-  const handleSubmit = async (e: React.FormEvent | null, codeToUse?: string) => {
-    if (e) e.preventDefault()
+  const lookup = async (codeValue: string, via: 'qr_link' | 'typed' = 'typed') => {
+    if (codeValue.length !== 4 || loading) return
     setError('')
-    
-    const codeValue = codeToUse || code
-    if (!codeValue.trim()) return
+    setLoading(true)
+
+    const fail = (message: string) => {
+      setError(message)
+      setCode('')
+      codeInput.current?.shake()
+      // Let the shake start, then put the cursor back in the first box
+      setTimeout(() => codeInput.current?.focus(), 0)
+    }
 
     try {
-      const link = await getLink(codeValue.trim().toLowerCase(), codeToUse ? 'qr_link' : 'typed')
+      const link = await getLink(codeValue, via)
       if (!link) {
-        setError("That code doesn't exist. Check the digits and try again.")
-        shakeInput()
+        fail("That code doesn't exist. Check the digits and try again.")
         return
       }
-
-      setResult({
-        content: link.content,
-        id: link.id,
-        expiresAt: link.expiresAt
-      })
+      setResult({ content: link.content, id: link.id, expiresAt: link.expiresAt })
       setCode('')
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to retrieve content')
-      shakeInput()
+    } catch (err) {
+      fail(err instanceof Error ? err.message : 'Failed to retrieve content')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -92,32 +82,30 @@ export const RetrieveForm: React.FC<RetrieveFormProps> = ({ initialCode }) => {
   return (
     <>
       <div className="card p-6 w-full">
-        <h2 className="text-lg font-semibold mb-6 text-gray-900">Retrieve a Link or Message</h2>
-        
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <input
-              ref={inputRef}
-              type="text"
-              className="input-field text-sm"
-              placeholder="Enter the 4-digit code (e.g., 1234)"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              maxLength={4}
-              required
-            />
-            {error && (
-              <p className="mt-2 text-red-500 text-xs animate-fade-in-fast">{error}</p>
-            )}
-          </div>
-          
+        <h2 className="text-lg font-semibold mb-1 text-gray-900">Enter the code</h2>
+        <p className="text-sm text-gray-500 mb-6">The 4 digits shown on the other device.</p>
+
+        <form onSubmit={e => { e.preventDefault(); lookup(code) }}>
+          <CodeInput
+            ref={codeInput}
+            value={code}
+            onChange={v => { setCode(v); if (error) setError('') }}
+            onComplete={v => lookup(v)}
+            invalid={Boolean(error)}
+            disabled={loading}
+            autoFocus={!initialCode && window.matchMedia('(hover: hover) and (pointer: fine)').matches}
+          />
+          <p className="mt-3 min-h-[1rem] text-center text-xs text-red-500" aria-live="polite">{error}</p>
+
           <button
             type="submit"
-            className="btn btn-primary w-full flex items-center justify-center text-sm"
-            disabled={!code.trim()}
+            className="btn btn-primary w-full flex items-center justify-center text-sm mt-3"
+            disabled={code.length !== 4 || loading}
           >
-            <Search className="h-4 w-4 mr-2" />
-            Retrieve
+            {loading
+              ? <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              : <Search className="h-4 w-4 mr-2" />}
+            {loading ? 'Opening…' : 'Retrieve'}
           </button>
         </form>
       </div>

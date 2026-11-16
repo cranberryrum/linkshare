@@ -13,11 +13,12 @@ interface Link {
 
 export type InputMethod = 'pasted' | 'typed'
 export type RetrieveVia = 'qr_link' | 'typed'
+export type ExpiryMinutes = 10 | 60 | 1440
 
 interface LinkContextType {
   links: Record<string, Link>
   receivedLinks: Record<string, Link>
-  dropLink: (content: string, inputMethod?: InputMethod) => Promise<Link>
+  dropLink: (content: string, inputMethod?: InputMethod, minutes?: ExpiryMinutes) => Promise<Link>
   getLink: (code: string, via?: RetrieveVia) => Promise<Link | null>
   deleteLink: (code: string) => Promise<void>
   updateLink: (code: string, content: string) => Promise<Link | null>
@@ -134,13 +135,17 @@ export const LinkProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     loadLinks()
   }, [creatorId])
 
-  const dropLink = async (content: string, inputMethod: InputMethod = 'typed'): Promise<Link> => {
+  const dropLink = async (
+    content: string,
+    inputMethod: InputMethod = 'typed',
+    minutes: ExpiryMinutes = 10
+  ): Promise<Link> => {
     const activeLinks = Object.values(links).filter(link => link.expiresAt > Date.now())
     if (activeLinks.length >= 5) {
       throw new Error('Maximum limit of 5 active drops reached')
     }
 
-    const result = await callRpc('create_link', { p_content: content, p_minutes: 10 })
+    const result = await callRpc('create_link', { p_content: content, p_minutes: minutes })
     if (result.status !== 'ok' || !result.code || !result.edit_token) {
       throw new Error(CREATE_ERRORS[result.status] || 'Failed to create link')
     }
@@ -152,7 +157,7 @@ export const LinkProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     posthog.capture('link_created', {
       code: link.id,
       expires_at: result.expires_at,
-      expiry_minutes: 10,
+      expiry_minutes: minutes,
       input_method: inputMethod,
       active_drops: Object.keys(links).length + 1,
       ...getLinkMeta(content)

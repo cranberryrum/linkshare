@@ -4,11 +4,13 @@ import QRCode from 'react-qr-code'
 import { useCountdown } from '../hooks/useCountdown'
 import { toast } from 'sonner'
 import { CopyIcon } from './CopyIcon'
+import { ContentPreview } from './ContentPreview'
 import posthog from 'posthog-js'
 
 interface DropResultProps {
   code: string
   content: string
+  createdAt: number
   expiresAt: number
   onReset: () => void
   onEdit: (content: string) => void
@@ -17,17 +19,23 @@ interface DropResultProps {
 export const DropResult: React.FC<DropResultProps> = ({
   code,
   content,
+  createdAt,
   expiresAt,
   onReset,
   onEdit
 }) => {
   const [isEditing, setIsEditing] = useState(false)
   const [editContent, setEditContent] = useState(content)
-  const { minutes, seconds, isExpired } = useCountdown(expiresAt)
+  const { msLeft, label, isExpired } = useCountdown(expiresAt)
   const [copied, setCopied] = useState(false)
   const copiedTimer = useRef<ReturnType<typeof setTimeout>>()
 
   useEffect(() => () => clearTimeout(copiedTimer.current), [])
+
+  // Share of the lifetime left; "ending soon" = last minute, or last 10% of long links
+  const total = Math.max(1, expiresAt - createdAt)
+  const remaining = Math.min(1, msLeft / total)
+  const endingSoon = !isExpired && msLeft <= Math.max(60_000, total * 0.1)
 
   const copyCode = () => {
     posthog.capture('code_copied', { code })
@@ -53,7 +61,6 @@ export const DropResult: React.FC<DropResultProps> = ({
       })
       return
     }
-    
     onEdit(editContent)
     setIsEditing(false)
   }
@@ -62,54 +69,63 @@ export const DropResult: React.FC<DropResultProps> = ({
 
   return (
     <div className="card p-6 w-full animate-scale-in">
-      <div className="flex items-center justify-between mb-6">
-        <div className="text-5xl font-bold text-app-blue tracking-wider py-2 rounded-app-button">
-          {code}
+      {/* The code is the product: big, spaced, easy to read aloud or across a room */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex gap-2" aria-label={`Code ${code.split('').join(' ')}`}>
+          {code.split('').map((digit, i) => (
+            <span
+              key={i}
+              aria-hidden
+              className={`flex h-16 w-12 sm:h-[72px] sm:w-14 items-center justify-center rounded-xl border text-4xl sm:text-[42px] font-semibold tabular-nums
+                ${isExpired ? 'border-gray-200 bg-gray-50 text-gray-300' : 'border-blue-100 bg-blue-50/60 text-app-blue'}`}
+            >
+              {digit}
+            </span>
+          ))}
         </div>
         <button
           onClick={copyCode}
-          className="btn btn-secondary flex items-center justify-center px-4 py-2 h-10"
+          className="btn btn-secondary flex h-11 w-11 items-center justify-center p-0"
           disabled={isExpired}
+          aria-label="Copy code"
         >
           <CopyIcon copied={copied} className="h-5 w-5 shrink-0" />
         </button>
       </div>
 
-      <p className="text-app-text-secondary mb-4">
-        Open linkshare.live on another device and enter this code to receive your content
-      </p>
-
-      {!isExpired && (
-        <p className="text-center text-app-text-secondary mb-4">
-          Expires in {minutes}:{seconds < 10 ? `0${seconds}` : seconds}
+      {/* Time left: a bar that drains, so it reads at a glance */}
+      <div className="mt-5">
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-100">
+          <div
+            className={`expiry-bar h-full w-full origin-left rounded-full ${endingSoon ? 'bg-amber-400' : 'bg-app-blue'}`}
+            style={{ transform: `scaleX(${remaining})` }}
+          />
+        </div>
+        <p className={`mt-2 text-xs ${isExpired ? 'text-red-500' : endingSoon ? 'text-amber-600' : 'text-gray-500'}`}>
+          {isExpired ? 'This code has expired' : `Expires in ${label}`}
         </p>
-      )}
+      </div>
 
-      <div className="mb-6">
-        <QRCode
-          value={qrValue}
-          size={96}
-          style={{ height: '96px', width: '96px', margin: '0 auto' }}
-          viewBox="0 0 96 96"
-        />
+      <div className="mt-5 flex items-center gap-4 rounded-xl border border-gray-200 p-3">
+        <QRCode value={qrValue} size={88} style={{ height: '88px', width: '88px', flexShrink: 0 }} viewBox="0 0 88 88" />
+        <p className="text-sm text-gray-500">
+          On the other device, open <span className="font-medium text-gray-900">linkshare.live</span> and enter the code, or scan this.
+        </p>
       </div>
 
       {isEditing ? (
-        <div className="mb-4">
+        <div className="mt-4">
           <textarea
-            className="input-field min-h-[100px] resize-none mb-2"
+            className="input-field min-h-[100px] resize-none mb-2 text-sm"
             value={editContent}
             onChange={(e) => setEditContent(e.target.value)}
             maxLength={400}
           />
-          <div className="text-right mb-2 text-app-text-secondary text-sm">
+          <div className="text-right mb-2 text-gray-500 text-xs">
             {editContent.length}/400 characters
           </div>
-          <div className="flex space-x-2">
-            <button
-              onClick={handleSave}
-              className="btn btn-primary flex-1"
-            >
+          <div className="flex gap-2">
+            <button onClick={handleSave} className="btn btn-primary flex-1 text-sm">
               Save
             </button>
             <button
@@ -117,36 +133,33 @@ export const DropResult: React.FC<DropResultProps> = ({
                 setIsEditing(false)
                 setEditContent(content)
               }}
-              className="btn btn-secondary flex-1"
+              className="btn btn-secondary flex-1 text-sm"
             >
               Cancel
             </button>
           </div>
         </div>
       ) : (
-        <div className="mb-4">
-          <div className="bg-gray-50 p-4 rounded-app-button border border-app-border">
-            <div className="flex items-start justify-between gap-2">
-              <div className="break-words flex-grow overflow-auto max-h-[200px] pr-2">
-                {content}
-              </div>
-              <button
-                onClick={() => setIsEditing(true)}
-                className="shrink-0 text-gray-500 hover:text-app-blue transition-colors ml-2"
-                disabled={isExpired}
-              >
-                <Pen className="h-5 w-5" />
-              </button>
-            </div>
+        <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-gray-200 bg-gray-50 p-3">
+          <div className="min-w-0 flex-1">
+            <ContentPreview content={content} />
           </div>
+          <button
+            onClick={() => setIsEditing(true)}
+            className="shrink-0 rounded-lg p-2 text-gray-400 hover:text-app-blue transition-colors"
+            disabled={isExpired}
+            aria-label="Edit content"
+          >
+            <Pen className="h-4 w-4" />
+          </button>
         </div>
       )}
 
       <button
         onClick={onReset}
-        className="btn btn-secondary w-full mt-3 flex items-center justify-center"
+        className="btn btn-secondary w-full mt-4 flex items-center justify-center text-sm"
       >
-        <PlusCircle className="h-5 w-5 mr-2 shrink-0" />
+        <PlusCircle className="h-4 w-4 mr-2 shrink-0" />
         New Drop
       </button>
     </div>

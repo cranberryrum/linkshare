@@ -15,7 +15,7 @@ export const Footer: React.FC = () => {
 
   return (
     <>
-      <footer className="py-6 px-4 text-center text-xs text-gray-500">
+      <footer className="page-enter py-6 px-4 text-center text-xs text-gray-500" style={{ '--i': 3 } as React.CSSProperties}>
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-col sm:flex-row justify-center items-center space-y-2 sm:space-y-0 sm:space-x-3 mb-2">
             <div className="flex items-center space-x-1">

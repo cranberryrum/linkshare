@@ -13,6 +13,13 @@ const EXPIRY_OPTIONS: { minutes: ExpiryMinutes; label: string }[] = [
 
 const EXPIRY_KEY = 'expiryMinutes'
 
+// Clip the active layer to one third: left, middle or right
+const EXPIRY_CLIP = [
+  'inset(0 66.667% 0 0 round 9999px)',
+  'inset(0 33.333% 0 33.333% round 9999px)',
+  'inset(0 0 0 66.667% round 9999px)'
+]
+
 // Remember the last choice on this device (falls back to 10 min)
 const readExpiry = (): ExpiryMinutes => {
   try {
@@ -28,6 +35,7 @@ export const DropForm: React.FC = () => {
   const [inputMethod, setInputMethod] = useState<InputMethod>('typed')
   const [expiry, setExpiry] = useState<ExpiryMinutes>(readExpiry)
   const [submitting, setSubmitting] = useState(false)
+  const [returned, setReturned] = useState(false)
   const [result, setResult] = useState<{
     code: string
     content: string
@@ -109,14 +117,14 @@ export const DropForm: React.FC = () => {
         content={result.content}
         createdAt={result.createdAt}
         expiresAt={result.expiresAt}
-        onReset={() => setResult(null)}
+        onReset={() => { setResult(null); setReturned(true) }}
         onEdit={handleEdit}
       />
     )
   }
 
   return (
-    <div className="card p-6 w-full">
+    <div className={`card p-6 w-full ${returned ? 'stagger-item' : ''}`}>
       <h2 className="text-lg font-semibold mb-6 text-gray-900">Drop a Link or Message</h2>
 
       <form onSubmit={handleSubmit}>
@@ -144,25 +152,35 @@ export const DropForm: React.FC = () => {
           <div
             role="radiogroup"
             aria-labelledby="expiry-label"
-            className="flex rounded-full bg-gray-100 p-1"
+            className="relative grid grid-cols-3 rounded-full bg-gray-100 p-1"
           >
-            {EXPIRY_OPTIONS.map(option => {
-              const selected = expiry === option.minutes
-              return (
-                <button
+            {EXPIRY_OPTIONS.map(option => (
+              <button
+                key={option.minutes}
+                type="button"
+                role="radio"
+                aria-checked={expiry === option.minutes}
+                onClick={() => chooseExpiry(option.minutes)}
+                className="relative w-16 rounded-full py-1.5 text-xs font-medium text-gray-500 transition-colors duration-150 hover:text-gray-700"
+              >
+                {option.label}
+              </button>
+            ))}
+            {/* Active layer: white pill + dark labels, clipped to the selected third */}
+            <div
+              aria-hidden
+              className="seg-active-layer pointer-events-none absolute inset-1 grid grid-cols-3"
+              style={{ clipPath: EXPIRY_CLIP[EXPIRY_OPTIONS.findIndex(o => o.minutes === expiry)] }}
+            >
+              {EXPIRY_OPTIONS.map(option => (
+                <span
                   key={option.minutes}
-                  type="button"
-                  role="radio"
-                  aria-checked={selected}
-                  onClick={() => chooseExpiry(option.minutes)}
-                  className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors duration-150 ${
-                    selected ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'
-                  }`}
+                  className="flex w-16 items-center justify-center rounded-full bg-white py-1.5 text-xs font-medium text-gray-900 shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
                 >
                   {option.label}
-                </button>
-              )
-            })}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
 

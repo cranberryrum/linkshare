@@ -4,7 +4,11 @@
 
 @layer base {
   :root {
+    /* Motion system: strong ease-out for anything entering or responding,
+       ease-in-out only for things moving across the screen */
     --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+    --stagger: 50ms;
   }
 
   body {
@@ -141,11 +145,6 @@
   animation: scaleOut 150ms var(--ease-out) forwards;
 }
 
-/* Segmented Drop / Receive control: one pill slides between the two tabs */
-.tab-pill {
-  transition: transform 200ms var(--ease-out);
-}
-
 /* Copy -> Check icon swap, both icons stacked in the same box */
 .swap-icon {
   transition: opacity 150ms var(--ease-out), transform 150ms var(--ease-out);
@@ -186,19 +185,89 @@
   transition: transform 1000ms linear, background-color 300ms ease;
 }
 
-/* Code boxes: quick border/ring feedback as focus moves box to box */
+/* ---------------------------------------------------------------------------
+   Entrances
+   --------------------------------------------------------------------------- */
+
+/* Page load (once per visit, so it can be a touch slower): header, tabs, card
+   and footer rise in sequence. Blur bridges the first frames so nothing pops. */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(10px); filter: blur(4px); }
+  to   { opacity: 1; transform: translateY(0);    filter: blur(0); }
+}
+
+.page-enter {
+  animation: rise 480ms var(--ease-out) backwards;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+
+/* Content arriving after an action (a drop result, a received link):
+   children follow each other by --stagger. Short, so it never feels slow. */
+@keyframes riseSm {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.stagger-item {
+  animation: riseSm 280ms var(--ease-out) backwards;
+  animation-delay: calc(var(--i, 0) * var(--stagger));
+}
+
+/* The code tiles land one by one: the moment the code is "minted" */
+@keyframes tileIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.94); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.code-tile {
+  animation: tileIn 360ms var(--ease-out) backwards;
+  animation-delay: calc(60ms + var(--i, 0) * 55ms);
+  transition: color 300ms ease, background-color 300ms ease, border-color 300ms ease;
+}
+
+/* Tab switch happens many times a session: one quick, interruption-friendly
+   fade with a 2px blur so the swap reads as one surface, not two. */
+@keyframes tabSwap {
+  from { opacity: 0; transform: translateY(4px); filter: blur(2px); }
+  to   { opacity: 1; transform: translateY(0);   filter: blur(0); }
+}
+
+.tab-swap {
+  animation: tabSwap 160ms var(--ease-out) backwards;
+}
+
+/* Newly added rows in Active Drops / Recently Received */
+.list-enter {
+  animation: riseSm 240ms var(--ease-out) backwards;
+  animation-delay: calc(var(--i, 0) * 40ms);
+}
+
+/* ---------------------------------------------------------------------------
+   Segmented controls: the active label colour is a clipped copy that moves
+   with the white pill, so colour and pill can never drift out of sync.
+   --------------------------------------------------------------------------- */
+.seg-active-layer {
+  transition: clip-path 220ms var(--ease-out);
+}
+
+/* Expiry bar: draws in once on arrival, then drains linearly */
+.expiry-bar[data-intro='true'] {
+  transition: transform 700ms var(--ease-out), background-color 300ms ease;
+}
+
+/* Waiting for the lookup: the boxes dim, so the 4th digit visibly "sent" */
+.code-box:disabled {
+  opacity: 0.55;
+}
+
 .code-box {
-  transition: border-color 120ms ease, box-shadow 120ms ease;
+  transition: border-color 120ms ease, box-shadow 120ms ease, opacity 150ms ease;
 }
 
 /* Reduced motion: keep fades so changes stay legible, drop movement and scale */
 @media (prefers-reduced-motion: reduce) {
   .btn:not(:disabled):active {
     transform: none;
-  }
-
-  .tab-pill {
-    transition: none;
   }
 
   .animate-scale-in {
@@ -216,6 +285,22 @@
 
   .drop-card-row {
     transition-duration: 0ms;
+  }
+
+  /* Entrances keep their fade but lose movement, scale and blur */
+  .page-enter,
+  .stagger-item,
+  .code-tile,
+  .tab-swap,
+  .list-enter {
+    animation-name: fadeIn;
+    animation-duration: 200ms;
+  }
+
+  .seg-active-layer,
+  .expiry-bar,
+  .expiry-bar[data-intro='true'] {
+    transition: background-color 300ms ease;
   }
 }
 

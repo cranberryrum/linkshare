@@ -18,6 +18,7 @@ export const RetrieveForm: React.FC<RetrieveFormProps> = ({ initialCode }) => {
     expiresAt: number
   } | null>(null)
   const [error, setError] = useState('')
+  const [returned, setReturned] = useState(false)
   const { getLink } = useLinks()
   const codeInput = useRef<CodeInputHandle>(null)
 
@@ -61,6 +62,7 @@ export const RetrieveForm: React.FC<RetrieveFormProps> = ({ initialCode }) => {
   const handleReset = () => {
     setResult(null)
     setError('')
+    setReturned(true)
   }
 
   if (result) {
@@ -81,7 +83,7 @@ export const RetrieveForm: React.FC<RetrieveFormProps> = ({ initialCode }) => {
 
   return (
     <>
-      <div className="card p-6 w-full">
+      <div className={`card p-6 w-full ${returned ? 'stagger-item' : ''}`}>
         <h2 className="text-lg font-semibold mb-1 text-gray-900">Enter the code</h2>
         <p className="text-sm text-gray-500 mb-6">The 4 digits shown on the other device.</p>
 

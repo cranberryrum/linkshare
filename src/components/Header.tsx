@@ -3,7 +3,7 @@ import { Link } from 'lucide-react'
 
 export const Header: React.FC = () => {
   return (
-    <header className="py-8 px-4 sm:px-6">
+    <header className="page-enter py-8 px-4 sm:px-6" style={{ '--i': 0 } as React.CSSProperties}>
       <div className="max-w-5xl mx-auto flex justify-center">
         <div className="flex items-center space-x-2">
           <Link className="h-5 w-5 text-blue-500" />

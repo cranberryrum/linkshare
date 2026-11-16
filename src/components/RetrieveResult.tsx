@@ -59,20 +59,20 @@ export const RetrieveResult: React.FC<RetrieveResultProps> = ({
   )
 
   return (
-    <div className="card p-6 w-full animate-scale-in">
-      <div className="flex items-baseline justify-between gap-3 mb-4">
+    <div className="card p-6 w-full stagger-item" style={{ '--i': 0 } as React.CSSProperties}>
+      <div className="flex items-baseline justify-between gap-3 mb-4 stagger-item" style={{ '--i': 1 } as React.CSSProperties}>
         <h2 className="text-lg font-semibold text-gray-900">Received</h2>
-        <span className={`text-xs ${isExpired ? 'text-red-500' : 'text-gray-500'}`}>
+        <span className={`text-xs tabular-nums ${isExpired ? 'text-red-500' : 'text-gray-500'}`}>
           {isExpired ? 'Expired' : `Code ${code} · expires in ${label}`}
         </span>
       </div>
 
-      <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+      <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 stagger-item" style={{ '--i': 2 } as React.CSSProperties}>
         <ContentPreview content={content} onLinkClick={trackOpen} />
       </div>
 
       {/* One obvious next step: open links, copy text */}
-      <div className="mt-5 flex gap-2">
+      <div className="mt-5 flex gap-2 stagger-item" style={{ '--i': 3 } as React.CSSProperties}>
         {isUrl ? (
           <>
             <button
@@ -91,7 +91,8 @@ export const RetrieveResult: React.FC<RetrieveResultProps> = ({
 
       <button
         onClick={onReset}
-        className="mt-3 w-full flex items-center justify-center gap-2 rounded-xl py-2 text-sm text-gray-500 hover:text-gray-900 transition-colors"
+        className="mt-3 w-full flex items-center justify-center gap-2 rounded-xl py-2 text-sm text-gray-500 hover:text-gray-900 transition-colors stagger-item"
+        style={{ '--i': 4 } as React.CSSProperties}
       >
         <RotateCcw className="h-3.5 w-3.5" />
         Enter another code

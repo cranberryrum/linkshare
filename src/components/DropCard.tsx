@@ -10,6 +10,7 @@ interface DropCardProps {
   expiresAt: number
   onDelete: () => Promise<boolean>
   showDelete?: boolean
+  index?: number
 }
 
 export const DropCard: React.FC<DropCardProps> = ({
@@ -17,7 +18,8 @@ export const DropCard: React.FC<DropCardProps> = ({
   content,
   expiresAt,
   onDelete,
-  showDelete = false
+  showDelete = false,
+  index = 0
 }) => {
   const { label, isExpired } = useCountdown(expiresAt)
   const [showQR, setShowQR] = useState(false)
@@ -44,7 +46,10 @@ export const DropCard: React.FC<DropCardProps> = ({
 
   return (
     <>
-      <div className={`drop-card-row ${isLeaving ? 'is-leaving' : ''}`}>
+      <div
+        className={`drop-card-row list-enter ${isLeaving ? 'is-leaving' : ''}`}
+        style={{ '--i': index } as React.CSSProperties}
+      >
         <div>
           <div className="drop-card bg-white rounded-2xl p-4 border border-gray-200 mb-3">
             <div className="flex justify-between items-start mb-2">

@@ -55,7 +55,7 @@ export const ActiveDrops: React.FC<ActiveDropsProps> = ({
       <h3 className="text-lg font-semibold mb-3">
         {showOnlyReceived ? 'Recently Received' : 'Active Drops'}
       </h3>
-      {linksToShow.map(([code, link]) => (
+      {linksToShow.map(([code, link], index) => (
         <DropCard
           key={code}
           id={code}
@@ -63,6 +63,7 @@ export const ActiveDrops: React.FC<ActiveDropsProps> = ({
           expiresAt={link.expiresAt}
           onDelete={() => handleDelete(code)}
           showDelete={!showOnlyReceived}
+          index={index}
         />
       ))}
     </div>

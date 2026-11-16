@@ -28,9 +28,18 @@ export const DropResult: React.FC<DropResultProps> = ({
   const [editContent, setEditContent] = useState(content)
   const { msLeft, label, isExpired } = useCountdown(expiresAt)
   const [copied, setCopied] = useState(false)
+  // Bar starts empty, draws in to the time left, then drains linearly
+  const [barIntro, setBarIntro] = useState<'start' | 'drawing' | 'done'>('start')
   const copiedTimer = useRef<ReturnType<typeof setTimeout>>()
 
   useEffect(() => () => clearTimeout(copiedTimer.current), [])
+
+  useEffect(() => {
+    // Wait for the tiles to land, then draw the bar in
+    const draw = setTimeout(() => setBarIntro('drawing'), 260)
+    const done = setTimeout(() => setBarIntro('done'), 260 + 720)
+    return () => { clearTimeout(draw); clearTimeout(done) }
+  }, [])
 
   // Share of the lifetime left; "ending soon" = last minute, or last 10% of long links
   const total = Math.max(1, expiresAt - createdAt)
@@ -68,7 +77,7 @@ export const DropResult: React.FC<DropResultProps> = ({
   const qrValue = `${window.location.origin}/?code=${code}`
 
   return (
-    <div className="card p-6 w-full animate-scale-in">
+    <div className="card p-6 w-full stagger-item" style={{ '--i': 0 } as React.CSSProperties}>
       {/* The code is the product: big, spaced, easy to read aloud or across a room */}
       <div className="flex items-center justify-between gap-3">
         <div className="flex gap-2" aria-label={`Code ${code.split('').join(' ')}`}>
@@ -76,7 +85,8 @@ export const DropResult: React.FC<DropResultProps> = ({
             <span
               key={i}
               aria-hidden
-              className={`flex h-16 w-12 sm:h-[72px] sm:w-14 items-center justify-center rounded-xl border text-4xl sm:text-[42px] font-semibold tabular-nums
+              style={{ '--i': i } as React.CSSProperties}
+              className={`code-tile flex h-16 w-12 sm:h-[72px] sm:w-14 items-center justify-center rounded-xl border text-4xl sm:text-[42px] font-semibold tabular-nums
                 ${isExpired ? 'border-gray-200 bg-gray-50 text-gray-300' : 'border-blue-100 bg-blue-50/60 text-app-blue'}`}
             >
               {digit}
@@ -94,19 +104,20 @@ export const DropResult: React.FC<DropResultProps> = ({
       </div>
 
       {/* Time left: a bar that drains, so it reads at a glance */}
-      <div className="mt-5">
+      <div className="mt-5 stagger-item" style={{ '--i': 4 } as React.CSSProperties}>
         <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-100">
           <div
+            data-intro={barIntro !== 'done'}
             className={`expiry-bar h-full w-full origin-left rounded-full ${endingSoon ? 'bg-amber-400' : 'bg-app-blue'}`}
-            style={{ transform: `scaleX(${remaining})` }}
+            style={{ transform: `scaleX(${barIntro === 'start' ? 0 : remaining})` }}
           />
         </div>
-        <p className={`mt-2 text-xs ${isExpired ? 'text-red-500' : endingSoon ? 'text-amber-600' : 'text-gray-500'}`}>
+        <p className={`mt-2 text-xs tabular-nums ${isExpired ? 'text-red-500' : endingSoon ? 'text-amber-600' : 'text-gray-500'}`}>
           {isExpired ? 'This code has expired' : `Expires in ${label}`}
         </p>
       </div>
 
-      <div className="mt-5 flex items-center gap-4 rounded-xl border border-gray-200 p-3">
+      <div className="mt-5 flex items-center gap-4 rounded-xl border border-gray-200 p-3 stagger-item" style={{ '--i': 5 } as React.CSSProperties}>
         <QRCode value={qrValue} size={88} style={{ height: '88px', width: '88px', flexShrink: 0 }} viewBox="0 0 88 88" />
         <p className="text-sm text-gray-500">
           On the other device, open <span className="font-medium text-gray-900">linkshare.live</span> and enter the code, or scan this.
@@ -114,7 +125,7 @@ export const DropResult: React.FC<DropResultProps> = ({
       </div>
 
       {isEditing ? (
-        <div className="mt-4">
+        <div className="mt-4 tab-swap">
           <textarea
             className="input-field min-h-[100px] resize-none mb-2 text-sm"
             value={editContent}
@@ -140,7 +151,7 @@ export const DropResult: React.FC<DropResultProps> = ({
           </div>
         </div>
       ) : (
-        <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-gray-200 bg-gray-50 p-3">
+        <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-gray-200 bg-gray-50 p-3 stagger-item" style={{ '--i': 6 } as React.CSSProperties}>
           <div className="min-w-0 flex-1">
             <ContentPreview content={content} />
           </div>
@@ -157,7 +168,8 @@ export const DropResult: React.FC<DropResultProps> = ({
 
       <button
         onClick={onReset}
-        className="btn btn-secondary w-full mt-4 flex items-center justify-center text-sm"
+        className="btn btn-secondary w-full mt-4 flex items-center justify-center text-sm stagger-item"
+        style={{ '--i': 7 } as React.CSSProperties}
       >
         <PlusCircle className="h-4 w-4 mr-2 shrink-0" />
         New Drop

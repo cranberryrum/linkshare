@@ -35,11 +35,6 @@ export const DropResult: React.FC<DropResultProps> = ({
       if ('vibrate' in navigator) {
         navigator.vibrate(5)
       }
-      toast.success('Code copied to clipboard', {
-        style: { background: '#dcfce7', borderColor: '#86efac' },
-        icon: '✓'
-      })
-
       setCopied(true)
       clearTimeout(copiedTimer.current)
       copiedTimer.current = setTimeout(() => setCopied(false), 1500)
@@ -61,9 +56,6 @@ export const DropResult: React.FC<DropResultProps> = ({
     
     onEdit(editContent)
     setIsEditing(false)
-    toast.success('Content updated successfully', {
-      style: { background: '#dcfce7', borderColor: '#86efac' }
-    })
   }
 
   const qrValue = `${window.location.origin}/?code=${code}`
@@ -133,7 +125,7 @@ export const DropResult: React.FC<DropResultProps> = ({
         </div>
       ) : (
         <div className="mb-4">
-          <div className="bg-gray-50/80 backdrop-blur-sm p-4 rounded-app-button border border-app-border">
+          <div className="bg-gray-50 p-4 rounded-app-button border border-app-border">
             <div className="flex items-start justify-between gap-2">
               <div className="break-words flex-grow overflow-auto max-h-[200px] pr-2">
                 {content}

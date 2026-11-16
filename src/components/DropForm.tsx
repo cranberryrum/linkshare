@@ -89,7 +89,7 @@ export const DropForm: React.FC = () => {
   }
 
   return (
-    <div className="card p-6 w-full animate-scale-in">
+    <div className="card p-6 w-full">
       <h2 className="text-lg font-semibold mb-6 text-gray-900">Drop a Link or Message</h2>
       
       <form onSubmit={handleSubmit}>
@@ -110,9 +110,7 @@ export const DropForm: React.FC = () => {
         
         <button
           type="submit"
-          className={`btn btn-primary w-full flex items-center justify-center text-sm ${
-            content.trim() ? '' : 'opacity-50 cursor-not-allowed'
-          }`}
+          className="btn btn-primary w-full flex items-center justify-center text-sm"
           disabled={!content.trim()}
         >
           <Send className="h-4 w-4 mr-2 shrink-0" />

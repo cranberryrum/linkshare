@@ -36,7 +36,6 @@ export const RetrieveResult: React.FC<RetrieveResultProps> = ({
       setCopied(true)
       clearTimeout(copiedTimer.current)
       copiedTimer.current = setTimeout(() => setCopied(false), 1500)
-      toast.success('Content copied to clipboard', { icon: '✓' })
     }).catch(() => {
       toast.error('Failed to copy content', { icon: '✕' })
     })

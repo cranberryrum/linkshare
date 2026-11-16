@@ -91,7 +91,7 @@ export const RetrieveForm: React.FC<RetrieveFormProps> = ({ initialCode }) => {
 
   return (
     <>
-      <div className="card p-6 w-full animate-scale-in">
+      <div className="card p-6 w-full">
         <h2 className="text-lg font-semibold mb-6 text-gray-900">Retrieve a Link or Message</h2>
         
         <form onSubmit={handleSubmit}>

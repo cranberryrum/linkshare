@@ -62,7 +62,7 @@ export const MainContent: React.FC = () => {
           {/* Active layer: same labels, white pill, clipped to the selected half */}
           <div
             aria-hidden
-            className="seg-active-layer pointer-events-none absolute inset-0 grid grid-cols-2 gap-1"
+            className="seg-active-layer pointer-events-none select-none absolute inset-0 grid grid-cols-2 gap-1"
             style={{ clipPath: CLIP[activeTab] }}
           >
             {TABS.map(tab => (

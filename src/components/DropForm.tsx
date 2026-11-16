@@ -169,7 +169,7 @@ export const DropForm: React.FC = () => {
             {/* Active layer: white pill + dark labels, clipped to the selected third */}
             <div
               aria-hidden
-              className="seg-active-layer pointer-events-none absolute inset-1 grid grid-cols-3"
+              className="seg-active-layer pointer-events-none select-none absolute inset-1 grid grid-cols-3"
               style={{ clipPath: EXPIRY_CLIP[EXPIRY_OPTIONS.findIndex(o => o.minutes === expiry)] }}
             >
               {EXPIRY_OPTIONS.map(option => (

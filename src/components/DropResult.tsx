@@ -86,8 +86,8 @@ export const DropResult: React.FC<DropResultProps> = ({
               key={i}
               aria-hidden
               style={{ '--i': i } as React.CSSProperties}
-              className={`code-tile flex h-16 w-12 sm:h-[72px] sm:w-14 items-center justify-center rounded-xl border text-4xl sm:text-[42px] font-semibold tabular-nums
-                ${isExpired ? 'border-gray-200 bg-gray-50 text-gray-300' : 'border-blue-100 bg-blue-50/60 text-app-blue'}`}
+              className={`code-tile flex h-16 w-12 sm:h-[72px] sm:w-14 items-center justify-center rounded-xl border font-mono text-[34px] sm:text-[38px] font-bold
+                ${isExpired ? 'border-gray-200 bg-gray-50 text-gray-300' : 'border-blue-100 bg-blue-50 text-blue-500'}`}
             >
               {digit}
             </span>

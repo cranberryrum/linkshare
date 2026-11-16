@@ -104,8 +104,8 @@ export const CodeInput = forwardRef<CodeInputHandle, CodeInputProps>(
               fillFrom(0, e.clipboardData.getData('text'))
             }}
             onKeyDown={handleKeyDown(i)}
-            className={`code-box h-16 w-14 sm:h-[72px] sm:w-16 rounded-xl border bg-white text-center text-3xl font-semibold
-              text-gray-900 outline-none caret-transparent
+            className={`code-box h-16 w-14 sm:h-[72px] sm:w-16 rounded-xl border bg-white text-center font-mono text-[28px] font-bold
+              text-ink outline-none caret-transparent
               ${invalid ? 'border-red-300 focus:border-red-400 focus:ring-4 focus:ring-red-500/10' : 'border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10'}`}
           />
         ))}

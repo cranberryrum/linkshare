@@ -16,8 +16,8 @@
     font-family: 'Figtree', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background-color: #f8f9fa;
-    color: #1a1a1a;
+    background-color: #F7F8FA;
+    color: #0B1020;
   }
 }
 
@@ -51,8 +51,8 @@
   }
 
   .btn {
-    @apply rounded-xl px-6 py-3 font-medium;
-    transition: transform 160ms var(--ease-out), background-color 200ms ease, box-shadow 200ms ease;
+    @apply rounded-xl px-6 py-3 font-medium border border-transparent;
+    transition: transform 160ms var(--ease-out), filter 150ms ease, box-shadow 150ms ease;
   }
 
   .btn:not(:disabled):active {
@@ -60,35 +60,60 @@
   }
 
   .btn:focus {
-    @apply outline-none ring-2;
+    @apply outline-none;
   }
 
+  .btn:focus-visible {
+    @apply ring-2;
+  }
+
+  /* Primary: a subtle top-to-bottom gradient, a 1px top highlight, a darker
+     edge and a soft tinted glow. Light enough to read as "pressable", never shiny. */
   .btn-primary {
-    @apply bg-blue-500 text-white;
+    color: #fff;
+    background-image: linear-gradient(180deg, #5873FF 0%, #3D5AFE 55%, #3049E0 100%);
+    border-color: #2F47D6;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.28),
+      0 1px 2px rgba(29, 45, 150, 0.25),
+      0 4px 12px -4px rgba(61, 90, 254, 0.45);
   }
 
   .btn-primary:not(:disabled):hover {
-    @apply bg-blue-600;
+    filter: brightness(1.06);
   }
 
-  /* Waiting for input, not broken: quiet neutral instead of washed-out blue */
+  .btn-primary:not(:disabled):active {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      0 1px 1px rgba(29, 45, 150, 0.25);
+  }
+
+  /* Waiting for input, not broken: quiet and flat */
   .btn-primary:disabled {
-    @apply bg-gray-100 text-gray-400 cursor-not-allowed;
+    @apply text-gray-400 cursor-not-allowed;
+    background-image: none;
+    background-color: #F1F2F5;
+    border-color: transparent;
+    box-shadow: none;
   }
 
-  .btn-primary:focus {
+  .btn-primary:focus-visible {
     @apply ring-blue-300;
   }
 
   .btn-secondary {
-    @apply border border-gray-200 bg-white text-gray-700 overflow-hidden;
+    @apply text-gray-700 overflow-hidden;
+    background-image: linear-gradient(180deg, #FFFFFF 0%, #F6F7FA 100%);
+    border-color: #E3E6EC;
+    box-shadow: inset 0 1px 0 #fff, 0 1px 2px rgba(11, 16, 32, 0.04);
   }
 
-  .btn-secondary:hover {
-    @apply bg-gray-50;
+  .btn-secondary:not(:disabled):hover {
+    filter: brightness(0.985);
   }
 
-  .btn-secondary:focus {
+  .btn-secondary:focus-visible {
     @apply ring-gray-200;
   }
 }

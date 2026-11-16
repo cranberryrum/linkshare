@@ -1,0 +1,13 @@
+# Netlify builds the site from GitHub on every push to main.
+# Env vars (VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, VITE_POSTHOG_KEY,
+# VITE_POSTHOG_HOST) are set in the Netlify dashboard, not in this repo.
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+  # These keys are public browser keys and are meant to be in the built JS,
+  # so Netlify's secret scanner shouldn't fail the build over them.
+  SECRETS_SCAN_OMIT_KEYS = "VITE_SUPABASE_URL,VITE_SUPABASE_ANON_KEY,VITE_POSTHOG_KEY,VITE_POSTHOG_HOST"

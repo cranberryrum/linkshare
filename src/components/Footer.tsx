@@ -1,5 +1,5 @@
 import React from 'react'
-import { Heart, HelpCircle } from 'lucide-react'
+import { Heart, HelpCircle, Download } from 'lucide-react'
 
 export const Footer: React.FC = () => {
   return (
@@ -29,6 +29,14 @@ export const Footer: React.FC = () => {
             Upvote on Product Hunt
           </a>
         </div>
+        <div className="flex items-center justify-center gap-4">
+        <a
+          href="#get-linkshare"
+          className="inline-flex items-center justify-center space-x-1 text-gray-500 hover:text-gray-700 transition-colors duration-200"
+        >
+          <Download className="h-4 w-4" />
+          <span>Get the app</span>
+        </a>
         <a
           href="#how-it-works"
           className="inline-flex items-center justify-center space-x-1 text-gray-500 hover:text-gray-700 transition-colors duration-200"
@@ -36,6 +44,7 @@ export const Footer: React.FC = () => {
           <HelpCircle className="h-4 w-4" />
           <span>How it works</span>
         </a>
+        </div>
       </div>
     </footer>
   )

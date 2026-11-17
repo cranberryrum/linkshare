@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { DropForm } from './DropForm'
 import { RetrieveForm } from './RetrieveForm'
+import { readIncomingShare, withoutShareParams, IncomingShare } from '../utils/incomingShare'
+import { analytics } from '../lib/analytics'
 
 type Tab = 'drop' | 'retrieve'
 
@@ -20,6 +22,7 @@ const CLIP: Record<Tab, string> = {
 export const MainContent: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('drop')
   const [initialCode, setInitialCode] = useState<string | null>(null)
+  const [incoming, setIncoming] = useState<IncomingShare | null>(null)
   // First paint uses the page-load sequence; later switches use the quick swap
   const hasSwitched = useRef(false)
 
@@ -35,10 +38,16 @@ export const MainContent: React.FC = () => {
   // ?code=1234 (from a QR scan): open the retrieve tab and let RetrieveForm do
   // the single lookup, so it shows any error and isn't counted twice.
   // ?tab=receive (home-screen shortcut): open the retrieve tab.
+  // ?url= / ?text= (share sheet, iPhone Shortcut, bookmarklet): fill the Drop form.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const code = params.get('code')
-    if (code) {
+    const shared = readIncomingShare(params)
+    if (shared) {
+      setIncoming(shared)
+      analytics.capture('share_received', { via: shared.via })
+      window.history.replaceState({}, '', withoutShareParams(params))
+    } else if (code) {
       setActiveTab('retrieve')
       setInitialCode(code)
       window.history.replaceState({}, '', window.location.pathname)
@@ -88,9 +97,9 @@ export const MainContent: React.FC = () => {
         style={{ '--i': 2 } as React.CSSProperties}
       >
         {activeTab === 'drop' ? (
-          <DropForm />
+          <DropForm incoming={incoming} />
         ) : (
-          <RetrieveForm initialCode={initialCode} />
+          <RetrieveForm initialCode={initialCode} onSendBack={() => handleTabChange('drop')} />
         )}
       </div>
     </div>

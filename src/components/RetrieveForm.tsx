@@ -7,9 +7,10 @@ import { CodeInput, CodeInputHandle } from './CodeInput'
 
 interface RetrieveFormProps {
   initialCode?: string | null
+  onSendBack?: () => void
 }
 
-export const RetrieveForm: React.FC<RetrieveFormProps> = ({ initialCode }) => {
+export const RetrieveForm: React.FC<RetrieveFormProps> = ({ initialCode, onSendBack }) => {
   const [code, setCode] = useState('')
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<{
@@ -73,6 +74,7 @@ export const RetrieveForm: React.FC<RetrieveFormProps> = ({ initialCode }) => {
           code={result.id}
           expiresAt={result.expiresAt}
           onReset={handleReset}
+          onSendBack={onSendBack}
         />
         <ActiveDrops showOnlyReceived />
       </>

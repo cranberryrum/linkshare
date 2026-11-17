@@ -11,6 +11,14 @@
     --stagger: 50ms;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+  }
+
   body {
     margin: 0;
     font-family: 'Figtree Variable', 'Figtree', system-ui, sans-serif;
@@ -363,4 +371,25 @@ body {
   font-family: 'Figtree Variable', 'Figtree', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+/* FAQ accordion: native <details>, so answers are in the HTML for crawlers
+   and work without JS. Hide the default disclosure triangle. */
+.faq summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq summary {
+  transition: color 150ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .faq summary:hover {
+    color: #3049E0;
+  }
+}
+
+.faq summary:focus-visible {
+  outline: 2px solid #9AA9FF;
+  outline-offset: -2px;
+  border-radius: 12px;
 }

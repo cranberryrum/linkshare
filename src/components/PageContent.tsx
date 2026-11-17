@@ -21,7 +21,7 @@ export const PageContent: React.FC<{ page: Page }> = ({ page }) => {
   }
 
   return (
-    <div className="max-w-[480px] mx-auto w-full px-8 pb-12 space-y-14">
+    <div className="max-w-[480px] mx-auto w-full px-8 pt-8 sm:pt-12 pb-12 space-y-14">
       <section id="how-it-works" aria-labelledby="how-heading" className="scroll-mt-6">
         <h2 id="how-heading" className="text-lg font-semibold text-gray-900 mb-5">
           {page.stepsHeading}

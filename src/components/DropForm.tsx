@@ -209,9 +209,7 @@ export const DropForm: React.FC = () => {
         </button>
       </form>
 
-      <div className="mt-8">
-        <ActiveDrops showOnlyOwn />
-      </div>
+      <ActiveDrops showOnlyOwn />
     </div>
   )
 }

@@ -6,6 +6,9 @@
     <title>Linkshare.live - Share Links & Text Easily</title>
     <meta name="description" content="Share a link or text with a 4-digit code. No sign-up, no app. Codes last 10 minutes to a day." />
     <meta name="theme-color" content="#F7F8FA" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="application-name" content="Linkshare" />
+    <meta name="apple-mobile-web-app-title" content="Linkshare" />
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -20,12 +23,51 @@
     <meta property="og:image" content="https://linkshare.live/og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Linkshare.live: share a link with a 4-digit code" />
+    <meta property="og:locale" content="en_US" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Linkshare.live - Share Links & Text Easily" />
+    <meta name="twitter:description" content="Share a link or text with a 4-digit code. No sign-up, no app. Codes last 10 minutes to a day." />
     <meta name="twitter:image" content="https://linkshare.live/og-image.png" />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="manifest" href="/manifest.webmanifest" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://linkshare.live/#website",
+            "url": "https://linkshare.live/",
+            "name": "Linkshare.live",
+            "alternateName": "linkshare"
+          },
+          {
+            "@type": "WebApplication",
+            "@id": "https://linkshare.live/#app",
+            "name": "Linkshare.live",
+            "url": "https://linkshare.live/",
+            "description": "Share a link or text between any two devices with a 4-digit code. No sign-up, no app. Codes last 10 minutes to a day.",
+            "applicationCategory": "UtilitiesApplication",
+            "operatingSystem": "Any (works in any web browser)",
+            "browserRequirements": "Requires JavaScript",
+            "isAccessibleForFree": true,
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+            "featureList": [
+              "Share a link or message up to 400 characters",
+              "4-digit code to receive on another device",
+              "QR code for phone-to-laptop sharing",
+              "Codes expire after 10 minutes, 1 hour or 1 day",
+              "No account or sign-up needed"
+            ],
+            "image": "https://linkshare.live/og-image.png",
+            "creator": { "@type": "Person", "name": "Aditya Kolte", "url": "https://adityakolte.com" },
+            "isPartOf": { "@id": "https://linkshare.live/#website" }
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

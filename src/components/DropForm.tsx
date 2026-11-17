@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useLayoutEffect } from 'react'
 import { Send } from 'lucide-react'
 import { useLinks, InputMethod, ExpiryMinutes } from '../contexts/LinkContext'
 import { DropResult } from './DropResult'
@@ -12,6 +12,9 @@ const EXPIRY_OPTIONS: { minutes: ExpiryMinutes; label: string }[] = [
 ]
 
 const EXPIRY_KEY = 'expiryMinutes'
+
+// useLayoutEffect warns during the build-time prerender; it only matters in the browser
+const useBrowserLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect
 
 // Clip the active layer to one third: left, middle or right
 const EXPIRY_CLIP = [
@@ -33,7 +36,10 @@ const readExpiry = (): ExpiryMinutes => {
 export const DropForm: React.FC = () => {
   const [content, setContent] = useState('')
   const [inputMethod, setInputMethod] = useState<InputMethod>('typed')
-  const [expiry, setExpiry] = useState<ExpiryMinutes>(readExpiry)
+  // Start at the default so the first render matches the prerendered HTML,
+  // then jump (without animating) to this device's saved choice.
+  const [expiry, setExpiry] = useState<ExpiryMinutes>(10)
+  const [expirySynced, setExpirySynced] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [returned, setReturned] = useState(false)
   const [result, setResult] = useState<{
@@ -43,6 +49,12 @@ export const DropForm: React.FC = () => {
     expiresAt: number
   } | null>(null)
   const { dropLink, updateLink } = useLinks()
+
+  useBrowserLayoutEffect(() => {
+    setExpiry(readExpiry())
+    const frame = requestAnimationFrame(() => setExpirySynced(true))
+    return () => cancelAnimationFrame(frame)
+  }, [])
 
   const chooseExpiry = (minutes: ExpiryMinutes) => {
     setExpiry(minutes)
@@ -170,7 +182,10 @@ export const DropForm: React.FC = () => {
             <div
               aria-hidden
               className="seg-active-layer pointer-events-none select-none absolute inset-1 grid grid-cols-3"
-              style={{ clipPath: EXPIRY_CLIP[EXPIRY_OPTIONS.findIndex(o => o.minutes === expiry)] }}
+              style={{
+                clipPath: EXPIRY_CLIP[EXPIRY_OPTIONS.findIndex(o => o.minutes === expiry)],
+                ...(expirySynced ? {} : { transition: 'none' })
+              }}
             >
               {EXPIRY_OPTIONS.map(option => (
                 <span

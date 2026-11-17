@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { ArrowUp, Check, X } from 'lucide-react'
-import posthog from 'posthog-js'
+import { analytics as posthog } from '../lib/analytics'
 import { supabase } from '../lib/supabase'
 
 // One-tap question shown under the content on the result screens.

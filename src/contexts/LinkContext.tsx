@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react'
 import { supabase } from '../lib/supabase'
-import posthog from 'posthog-js'
+import { analytics as posthog } from '../lib/analytics'
 import { getLinkMeta } from '../utils/linkMeta'
 
 interface Link {

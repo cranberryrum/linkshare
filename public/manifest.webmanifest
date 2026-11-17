@@ -1,0 +1,23 @@
+{
+  "id": "/",
+  "name": "Linkshare.live - Share Links & Text Easily",
+  "short_name": "Linkshare",
+  "description": "Share a link or text between any two devices with a 4-digit code. No sign-up, no app.",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F7F8FA",
+  "theme_color": "#F7F8FA",
+  "lang": "en",
+  "categories": ["utilities", "productivity"],
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "shortcuts": [
+    { "name": "Receive with a code", "short_name": "Receive", "url": "/?tab=receive", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

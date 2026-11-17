@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { QrCode, Trash2 } from 'lucide-react'
 import { useCountdown } from '../hooks/useCountdown'
 import { QRModal } from './QRModal'
-import posthog from 'posthog-js'
+import { analytics as posthog } from '../lib/analytics'
 
 interface DropCardProps {
   id: string

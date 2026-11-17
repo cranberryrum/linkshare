@@ -4,7 +4,7 @@ import { useCountdown } from '../hooks/useCountdown'
 import { toast } from 'sonner'
 import { CopyIcon } from './CopyIcon'
 import { ContentPreview, isUrlContent, toHref } from './ContentPreview'
-import posthog from 'posthog-js'
+import { analytics as posthog } from '../lib/analytics'
 import { getLinkMeta } from '../utils/linkMeta'
 import { QuickQuestion } from './QuickQuestion'
 

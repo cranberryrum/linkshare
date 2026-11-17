@@ -13,7 +13,7 @@
 
   body {
     margin: 0;
-    font-family: 'Figtree', sans-serif;
+    font-family: 'Figtree Variable', 'Figtree', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background-color: #F7F8FA;
@@ -360,7 +360,7 @@
 
 body {
   margin: 0;
-  font-family: 'Figtree', sans-serif;
+  font-family: 'Figtree Variable', 'Figtree', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

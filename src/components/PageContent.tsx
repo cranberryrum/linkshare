@@ -1,6 +1,7 @@
 import React from 'react'
 import { ChevronDown } from 'lucide-react'
 import { Page, PAGES, SITE_URL } from '../content/pages'
+import { QuickAccess } from './QuickAccess'
 
 // Below-the-fold content: how it works, FAQ and links to the other use-case
 // pages. Real, visible text for search engines and for people who scroll.
@@ -22,6 +23,8 @@ export const PageContent: React.FC<{ page: Page }> = ({ page }) => {
 
   return (
     <div className="max-w-[480px] mx-auto w-full px-8 pt-8 sm:pt-12 pb-12 space-y-14">
+      <QuickAccess />
+
       <section id="how-it-works" aria-labelledby="how-heading" className="scroll-mt-6">
         <h2 id="how-heading" className="text-lg font-semibold text-gray-900 mb-5">
           {page.stepsHeading}

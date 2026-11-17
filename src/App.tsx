@@ -26,6 +26,15 @@ function App({ page }: { page: Page }) {
           <div className="flex justify-center px-4 pt-1 sm:pt-4 pb-4">
             <MainContent />
           </div>
+          <p className="page-enter -mt-2 px-4 text-center" style={{ '--i': 3 } as React.CSSProperties}>
+            <a
+              href="#get-linkshare"
+              className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+            >
+              Get Linkshare on your phone or browser
+              <span aria-hidden>↓</span>
+            </a>
+          </p>
           <PageContent page={page} />
         </main>
         <Footer />

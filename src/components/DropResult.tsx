@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { PlusCircle, Pen } from 'lucide-react'
+import { PlusCircle, Pen, Share } from 'lucide-react'
 import QRCode from 'react-qr-code'
 import { useCountdown } from '../hooks/useCountdown'
 import { toast } from 'sonner'
@@ -76,6 +76,35 @@ export const DropResult: React.FC<DropResultProps> = ({
   }
 
   const qrValue = `${window.location.origin}/?code=${code}`
+
+  // Send the code as a message. The link in it opens Linkshare with the code
+  // already filled in, and is how new people find out about Linkshare.
+  const shareCode = async () => {
+    const mins = Math.max(1, Math.round((expiresAt - Date.now()) / 60_000))
+    const left = mins < 60 ? `${mins} min` : `${Math.round(mins / 60)} hour${Math.round(mins / 60) === 1 ? '' : 's'}`
+    const text = `Here's something for you on Linkshare. Code ${code}, expires in ${left}.`
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Linkshare code', text, url: qrValue })
+        posthog.capture('code_shared', { code, method: 'share_sheet' })
+      } catch {
+        // Closed the share sheet: nothing to do
+      }
+      return
+    }
+    try {
+      await navigator.clipboard.writeText(`${text}\n${qrValue}`)
+      posthog.capture('code_shared', { code, method: 'copied_message' })
+      toast.success('Message copied. Paste it anywhere to send.', {
+        style: { background: '#dcfce7', borderColor: '#86efac' }
+      })
+    } catch {
+      toast.error('Couldn’t copy the message', {
+        style: { background: '#fee2e2', borderColor: '#fca5a5' },
+        icon: '✕'
+      })
+    }
+  }
 
   return (
     <>
@@ -168,14 +197,23 @@ export const DropResult: React.FC<DropResultProps> = ({
         </div>
       )}
 
-      <button
-        onClick={onReset}
-        className="btn btn-secondary w-full mt-4 flex items-center justify-center text-sm stagger-item"
-        style={{ '--i': 7 } as React.CSSProperties}
-      >
-        <PlusCircle className="h-4 w-4 mr-2 shrink-0" />
-        New Drop
-      </button>
+      <div className="mt-4 flex gap-2 stagger-item" style={{ '--i': 7 } as React.CSSProperties}>
+        <button
+          onClick={shareCode}
+          disabled={isExpired}
+          className="btn btn-primary flex-1 flex items-center justify-center gap-2 text-sm"
+        >
+          <Share className="h-4 w-4 shrink-0" />
+          Share code
+        </button>
+        <button
+          onClick={onReset}
+          className="btn btn-secondary flex-1 flex items-center justify-center gap-2 text-sm"
+        >
+          <PlusCircle className="h-4 w-4 shrink-0" />
+          New Drop
+        </button>
+      </div>
 
     </div>
 

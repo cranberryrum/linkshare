@@ -5,8 +5,11 @@ import '@fontsource/jetbrains-mono/600.css'
 import '@fontsource/jetbrains-mono/700.css'
 import App from './App.tsx'
 import { initAnalytics } from './lib/analytics'
+import { listenForInstallPrompt } from './lib/install'
 import { pageForPath } from './content/pages'
 import './index.css'
+
+listenForInstallPrompt()
 
 const root = document.getElementById('root')!
 const app = (

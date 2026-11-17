@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { ExternalLink, RotateCcw } from 'lucide-react'
+import { ExternalLink, RotateCcw, Reply } from 'lucide-react'
 import { useCountdown } from '../hooks/useCountdown'
 import { toast } from 'sonner'
 import { CopyIcon } from './CopyIcon'
@@ -13,13 +13,15 @@ interface RetrieveResultProps {
   code: string
   expiresAt: number
   onReset: () => void
+  onSendBack?: () => void
 }
 
 export const RetrieveResult: React.FC<RetrieveResultProps> = ({
   content,
   code,
   expiresAt,
-  onReset
+  onReset,
+  onSendBack
 }) => {
   const { label, isExpired } = useCountdown(expiresAt)
   const [copied, setCopied] = useState(false)
@@ -100,10 +102,32 @@ export const RetrieveResult: React.FC<RetrieveResultProps> = ({
         Enter another code
       </button>
 
+      {/* The receiver is the next sender: one tap to send something back */}
+      {onSendBack && (
+        <div
+          className="mt-4 flex items-center justify-between gap-3 border-t border-gray-200 pt-4 text-xs text-gray-500 stagger-item"
+          style={{ '--i': 5 } as React.CSSProperties}
+        >
+          <span>
+            Sent with <span className="font-medium text-gray-700">linkshare.live</span>
+          </span>
+          <button
+            onClick={() => {
+              posthog.capture('send_back_clicked', { code })
+              onSendBack()
+            }}
+            className="inline-flex items-center gap-1.5 font-medium text-blue-600 hover:text-blue-700 transition-colors"
+          >
+            <Reply className="h-3.5 w-3.5" />
+            Send something back
+          </button>
+        </div>
+      )}
+
     </div>
 
     {/* Below the card, not inside it: easier to notice, never crowds the content */}
-    <QuickQuestion question="receive_sender" index={5} />
+    <QuickQuestion question="receive_sender" index={6} />
     </>
   )
 }

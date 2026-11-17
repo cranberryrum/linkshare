@@ -11,7 +11,7 @@ interface Link {
   creatorId: string
 }
 
-export type InputMethod = 'pasted' | 'typed'
+export type InputMethod = 'pasted' | 'typed' | 'share_target' | 'shortcut' | 'bookmarklet'
 export type RetrieveVia = 'qr_link' | 'typed'
 export type ExpiryMinutes = 10 | 60 | 1440
 

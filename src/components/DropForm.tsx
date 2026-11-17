@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useLayoutEffect } from 'react'
+import React, { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { Send } from 'lucide-react'
 import { useLinks, InputMethod, ExpiryMinutes } from '../contexts/LinkContext'
 import { DropResult } from './DropResult'
 import { ActiveDrops } from './ActiveDrops'
 import { toast } from 'sonner'
+import type { IncomingShare } from '../utils/incomingShare'
 
 const EXPIRY_OPTIONS: { minutes: ExpiryMinutes; label: string }[] = [
   { minutes: 10, label: '10 min' },
@@ -33,7 +34,7 @@ const readExpiry = (): ExpiryMinutes => {
   }
 }
 
-export const DropForm: React.FC = () => {
+export const DropForm: React.FC<{ incoming?: IncomingShare | null }> = ({ incoming }) => {
   const [content, setContent] = useState('')
   const [inputMethod, setInputMethod] = useState<InputMethod>('typed')
   // Start at the default so the first render matches the prerendered HTML,
@@ -49,6 +50,17 @@ export const DropForm: React.FC = () => {
     expiresAt: number
   } | null>(null)
   const { dropLink, updateLink } = useLinks()
+  const submitRef = useRef<HTMLButtonElement>(null)
+
+  // Shared in from another app or page: fill the box and put focus on Drop It,
+  // so it's one tap (or Enter) away. The expiry stays the user's choice.
+  useEffect(() => {
+    if (!incoming) return
+    setResult(null)
+    setContent(incoming.content)
+    setInputMethod(incoming.via)
+    requestAnimationFrame(() => submitRef.current?.focus({ preventScroll: true }))
+  }, [incoming])
 
   useBrowserLayoutEffect(() => {
     setExpiry(readExpiry())
@@ -200,6 +212,7 @@ export const DropForm: React.FC = () => {
         </div>
 
         <button
+          ref={submitRef}
           type="submit"
           className="btn btn-primary w-full flex items-center justify-center text-sm"
           disabled={!content.trim() || submitting}

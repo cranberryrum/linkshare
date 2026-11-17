@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useSyncExternalStore } from 'react'
-import { Bookmark, Download, PlusSquare, Share, Send, CheckCircle2 } from 'lucide-react'
+import React, { useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { Bookmark, Download, PlusSquare, Share, Send, CheckCircle2, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { analytics } from '../lib/analytics'
 import {
@@ -10,6 +10,8 @@ import {
   wasInstalled
 } from '../lib/install'
 import { BOOKMARKLET, IOS_SHORTCUT_URL } from '../content/quickAccess'
+import { closeGetApp, useGetAppOpen } from '../lib/getApp'
+import { usePresence } from '../hooks/usePresence'
 
 type Platform = 'iphone' | 'android' | 'computer'
 
@@ -66,18 +68,41 @@ const InlineIcon: React.FC<{ children: React.ReactNode; label: string }> = ({ ch
   </span>
 )
 
-export const QuickAccess: React.FC = () => {
-  // Server and first client render agree on 'computer'; the real device is
-  // picked right after hydration (this section is below the fold).
-  const [platform, setPlatform] = useState<Platform>('computer')
-  const [standalone, setStandalone] = useState(false)
-  const [isMac, setIsMac] = useState(false)
-  const { canInstall, installed } = useInstallState()
+// "Get the app" popup: bottom sheet on phones, centred dialog on larger screens.
+// Only mounted while open, so it can read the device straight away.
+export const GetAppModal: React.FC = () => {
+  const isOpen = useGetAppOpen()
+  const { isMounted, isClosing, onExitEnd } = usePresence(isOpen)
+  if (!isMounted) return null
+  return (
+    <div
+      className={`fixed inset-0 z-50 flex items-end justify-center bg-black/30 backdrop-blur-sm sm:items-center sm:p-4 ${isClosing ? 'animate-fade-out' : 'animate-fade-in'}`}
+      onAnimationEnd={onExitEnd}
+      onClick={e => { if (e.target === e.currentTarget) closeGetApp() }}
+    >
+      <GetAppDialog closing={isClosing} />
+    </div>
+  )
+}
 
+const GetAppDialog: React.FC<{ closing: boolean }> = ({ closing }) => {
+  const [platform, setPlatform] = useState<Platform>(detectPlatform)
+  const [standalone] = useState(isStandalone)
+  const [isMac] = useState(() => /Mac/.test(navigator.platform) || /Macintosh/.test(navigator.userAgent))
+  const { canInstall, installed } = useInstallState()
+  const closeRef = useRef<HTMLButtonElement>(null)
+
+  // Escape closes, focus starts on the dialog, and the page behind doesn't scroll
   useEffect(() => {
-    setPlatform(detectPlatform())
-    setStandalone(isStandalone())
-    setIsMac(/Mac/.test(navigator.platform) || /Macintosh/.test(navigator.userAgent))
+    closeRef.current?.focus()
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') closeGetApp() }
+    const overflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', onKey)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      document.body.style.overflow = overflow
+    }
   }, [])
 
   const choose = (p: Platform) => {
@@ -100,9 +125,22 @@ export const QuickAccess: React.FC = () => {
   const appReady = standalone || installed
 
   return (
-    <section id="get-linkshare" aria-labelledby="get-heading" className="scroll-mt-6">
-      <h2 id="get-heading" className="text-lg font-semibold text-gray-900">
-        Get Linkshare on your device
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="get-heading"
+      className={`sheet relative max-h-[90svh] w-full overflow-y-auto rounded-t-2xl border border-gray-200 bg-[#F7F8FA] p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:max-w-md sm:rounded-2xl sm:p-6 ${closing ? 'animate-scale-out' : 'animate-scale-in'}`}
+    >
+      <button
+        ref={closeRef}
+        onClick={closeGetApp}
+        aria-label="Close"
+        className="absolute right-4 top-4 rounded-lg p-1 text-gray-400 hover:text-gray-600 transition-colors"
+      >
+        <X className="h-5 w-5" />
+      </button>
+      <h2 id="get-heading" className="pr-8 text-lg font-semibold text-gray-900">
+        Get Linkshare
       </h2>
       <p className="mt-1 mb-4 text-sm text-gray-500">
         Open it in one tap, or send links to it straight from other apps.
@@ -210,7 +248,7 @@ export const QuickAccess: React.FC = () => {
                 <a
                   // React warns about javascript: URLs in JSX, so set it on the element directly
                   ref={el => el?.setAttribute('href', BOOKMARKLET)}
-                  href="#get-linkshare"
+                  href="#"
                   draggable
                   onClick={e => {
                     e.preventDefault()
@@ -245,6 +283,6 @@ export const QuickAccess: React.FC = () => {
           </>
         )}
       </ul>
-    </section>
+    </div>
   )
 }

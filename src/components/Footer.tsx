@@ -1,5 +1,6 @@
 import React from 'react'
 import { Heart, HelpCircle, Download } from 'lucide-react'
+import { openGetApp } from '../lib/getApp'
 
 export const Footer: React.FC = () => {
   return (
@@ -30,20 +31,20 @@ export const Footer: React.FC = () => {
           </a>
         </div>
         <div className="flex items-center justify-center gap-4">
-        <a
-          href="#get-linkshare"
-          className="inline-flex items-center justify-center space-x-1 text-gray-500 hover:text-gray-700 transition-colors duration-200"
-        >
-          <Download className="h-4 w-4" />
-          <span>Get the app</span>
-        </a>
-        <a
-          href="#how-it-works"
-          className="inline-flex items-center justify-center space-x-1 text-gray-500 hover:text-gray-700 transition-colors duration-200"
-        >
-          <HelpCircle className="h-4 w-4" />
-          <span>How it works</span>
-        </a>
+          <button
+            onClick={() => openGetApp('footer')}
+            className="inline-flex items-center justify-center space-x-1 text-gray-500 hover:text-gray-700 transition-colors duration-200"
+          >
+            <Download className="h-4 w-4" />
+            <span>Get the app</span>
+          </button>
+          <a
+            href="#how-it-works"
+            className="inline-flex items-center justify-center space-x-1 text-gray-500 hover:text-gray-700 transition-colors duration-200"
+          >
+            <HelpCircle className="h-4 w-4" />
+            <span>How it works</span>
+          </a>
         </div>
       </div>
     </footer>

@@ -6,6 +6,9 @@ import { MainContent } from './components/MainContent'
 import { PageContent } from './components/PageContent'
 import { Page } from './content/pages'
 import { Toaster } from 'sonner'
+import { Smartphone } from 'lucide-react'
+import { GetAppModal } from './components/GetAppModal'
+import { openGetApp } from './lib/getApp'
 
 function App({ page }: { page: Page }) {
   return (
@@ -26,18 +29,19 @@ function App({ page }: { page: Page }) {
           <div className="flex justify-center px-4 pt-1 sm:pt-4 pb-4">
             <MainContent />
           </div>
-          <p className="page-enter -mt-2 px-4 text-center" style={{ '--i': 3 } as React.CSSProperties}>
-            <a
-              href="#get-linkshare"
-              className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+          <div className="page-enter -mt-1 flex justify-center px-4" style={{ '--i': 3 } as React.CSSProperties}>
+            <button
+              onClick={() => openGetApp('under_tool')}
+              className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:border-blue-200 hover:text-blue-600"
             >
-              Get Linkshare on your phone or browser
-              <span aria-hidden>↓</span>
-            </a>
-          </p>
+              <Smartphone className="h-3.5 w-3.5" />
+              Get the app
+            </button>
+          </div>
           <PageContent page={page} />
         </main>
         <Footer />
+        <GetAppModal />
         <Toaster 
           position="bottom-right"
           toastOptions={{

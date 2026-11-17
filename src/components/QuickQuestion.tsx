@@ -118,11 +118,12 @@ export const QuickQuestion: React.FC<QuickQuestionProps> = ({ question, index })
       style={{ '--i': index } as React.CSSProperties}
     >
       <div>
-        <div className="mt-5 border-t border-gray-100 pt-4">
+        <div className="pt-3">
+          <div className="card px-5 py-4">
           {step === 'ask' && (
             <div className="tab-swap">
               <div className="flex items-center justify-between gap-3">
-                <p className="text-xs font-medium text-gray-500">{config.prompt}</p>
+                <p className="text-sm font-medium text-gray-700">{config.prompt}</p>
                 <button
                   onClick={dismiss}
                   aria-label="Hide this question"
@@ -152,7 +153,7 @@ export const QuickQuestion: React.FC<QuickQuestionProps> = ({ question, index })
           {step === 'note' && (
             <form className="tab-swap" onSubmit={sendNote}>
               <div className="flex items-center justify-between gap-3">
-                <p className="text-xs font-medium text-gray-500">Thanks! What would make Linkshare better?</p>
+                <p className="text-sm font-medium text-gray-700">Thanks! What would make Linkshare better?</p>
                 <button
                   type="button"
                   onClick={() => setStep('thanks')}
@@ -175,7 +176,7 @@ export const QuickQuestion: React.FC<QuickQuestionProps> = ({ question, index })
                   type="submit"
                   aria-label="Send"
                   disabled={!note.trim()}
-                  className="btn btn-primary absolute right-1.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center p-0"
+                  className="btn btn-primary absolute right-1.5 top-1/2 -mt-4 flex h-8 w-8 items-center justify-center p-0"
                 >
                   <ArrowUp className="h-4 w-4" />
                 </button>
@@ -184,11 +185,12 @@ export const QuickQuestion: React.FC<QuickQuestionProps> = ({ question, index })
           )}
 
           {step === 'thanks' && (
-            <p className="tab-swap flex items-center gap-1.5 text-xs font-medium text-gray-500" aria-live="polite">
+            <p className="tab-swap flex items-center gap-1.5 text-sm font-medium text-gray-700" aria-live="polite">
               <Check className="h-3.5 w-3.5 text-blue-500" />
               Thanks, that helps.
             </p>
           )}
+          </div>
         </div>
       </div>
     </div>

@@ -60,6 +60,7 @@ export const RetrieveResult: React.FC<RetrieveResultProps> = ({
   )
 
   return (
+    <>
     <div className="card p-6 w-full stagger-item" style={{ '--i': 0 } as React.CSSProperties}>
       <div className="flex items-baseline justify-between gap-3 mb-4 stagger-item" style={{ '--i': 1 } as React.CSSProperties}>
         <h2 className="text-lg font-semibold text-gray-900">Received</h2>
@@ -99,7 +100,10 @@ export const RetrieveResult: React.FC<RetrieveResultProps> = ({
         Enter another code
       </button>
 
-      <QuickQuestion question="receive_sender" index={5} />
     </div>
+
+    {/* Below the card, not inside it: easier to notice, never crowds the content */}
+    <QuickQuestion question="receive_sender" index={5} />
+    </>
   )
 }

@@ -78,6 +78,7 @@ export const DropResult: React.FC<DropResultProps> = ({
   const qrValue = `${window.location.origin}/?code=${code}`
 
   return (
+    <>
     <div className="card p-6 w-full stagger-item" style={{ '--i': 0 } as React.CSSProperties}>
       {/* The code is the product: big, spaced, easy to read aloud or across a room */}
       <div className="flex items-center justify-between gap-3">
@@ -176,7 +177,10 @@ export const DropResult: React.FC<DropResultProps> = ({
         New Drop
       </button>
 
-      <QuickQuestion question="drop_audience" index={8} />
     </div>
+
+    {/* Below the card, not inside it: easier to notice, never crowds the code */}
+    <QuickQuestion question="drop_audience" index={8} />
+    </>
   )
 }

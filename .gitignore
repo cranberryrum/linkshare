@@ -6,6 +6,7 @@ supabase/.temp/
 
 # Build output (regenerated on deploy)
 dist/
+dist-server/
 
 # Local Netlify folder
 .netlify

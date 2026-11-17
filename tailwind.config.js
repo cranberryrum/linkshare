@@ -8,7 +8,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Figtree', 'sans-serif'],
+        sans: ['"Figtree Variable"', 'Figtree', 'system-ui', 'sans-serif'],
         // Codes and countdowns: every digit the same width, reads like a code
         mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },

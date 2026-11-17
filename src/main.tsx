@@ -1,20 +1,26 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import posthog from 'posthog-js'
+import '@fontsource-variable/figtree'
+import '@fontsource/jetbrains-mono/600.css'
+import '@fontsource/jetbrains-mono/700.css'
 import App from './App.tsx'
+import { initAnalytics } from './lib/analytics'
+import { pageForPath } from './content/pages'
 import './index.css'
 
-if (import.meta.env.VITE_POSTHOG_KEY) {
-  posthog.init(import.meta.env.VITE_POSTHOG_KEY, {
-    api_host: import.meta.env.VITE_POSTHOG_HOST,
-    person_profiles: 'identified_only',
-    capture_pageview: true,
-    capture_pageleave: true,
-  })
+const root = document.getElementById('root')!
+const app = (
+  <React.StrictMode>
+    <App page={pageForPath(window.location.pathname)} />
+  </React.StrictMode>
+)
+
+// Production HTML is prerendered at build time: attach to it instead of
+// re-drawing it. In dev the root is empty, so render from scratch.
+if (root.hasChildNodes()) {
+  ReactDOM.hydrateRoot(root, app)
+} else {
+  ReactDOM.createRoot(root).render(app)
 }
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-)
+initAnalytics()

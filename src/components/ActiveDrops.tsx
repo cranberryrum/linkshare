@@ -51,7 +51,8 @@ export const ActiveDrops: React.FC<ActiveDropsProps> = ({
   }
 
   return (
-    <div className="animate-fade-in">
+    // Owns its top margin, so an empty list leaves no gap
+    <div className="mt-8 animate-fade-in">
       <h3 className="text-lg font-semibold mb-3">
         {showOnlyReceived ? 'Recently Received' : 'Active Drops'}
       </h3>

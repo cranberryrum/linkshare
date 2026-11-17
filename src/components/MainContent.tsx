@@ -34,17 +34,22 @@ export const MainContent: React.FC = () => {
 
   // ?code=1234 (from a QR scan): open the retrieve tab and let RetrieveForm do
   // the single lookup, so it shows any error and isn't counted twice.
+  // ?tab=receive (home-screen shortcut): open the retrieve tab.
   useEffect(() => {
-    const code = new URLSearchParams(window.location.search).get('code')
+    const params = new URLSearchParams(window.location.search)
+    const code = params.get('code')
     if (code) {
       setActiveTab('retrieve')
       setInitialCode(code)
+      window.history.replaceState({}, '', window.location.pathname)
+    } else if (params.get('tab') === 'receive') {
+      setActiveTab('retrieve')
       window.history.replaceState({}, '', window.location.pathname)
     }
   }, [])
 
   return (
-    <div className="max-w-md mx-auto p-4 w-full min-h-[500px]">
+    <div className="max-w-md mx-auto p-4 w-full">
       <div className="page-enter mb-8 rounded-full bg-gray-100 p-1" style={{ '--i': 1 } as React.CSSProperties}>
         <div className="relative grid grid-cols-2 gap-1" role="tablist">
           {TABS.map(tab => (

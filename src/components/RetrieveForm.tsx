@@ -74,9 +74,7 @@ export const RetrieveForm: React.FC<RetrieveFormProps> = ({ initialCode }) => {
           expiresAt={result.expiresAt}
           onReset={handleReset}
         />
-        <div className="mt-8">
-          <ActiveDrops showOnlyReceived />
-        </div>
+        <ActiveDrops showOnlyReceived />
       </>
     )
   }
@@ -112,9 +110,7 @@ export const RetrieveForm: React.FC<RetrieveFormProps> = ({ initialCode }) => {
         </form>
       </div>
 
-      <div className="mt-8">
-        <ActiveDrops showOnlyReceived />
-      </div>
+      <ActiveDrops showOnlyReceived />
     </>
   )
 }

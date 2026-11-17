@@ -6,7 +6,7 @@ import { toast } from 'sonner'
 import { CopyIcon } from './CopyIcon'
 import { ContentPreview } from './ContentPreview'
 import { QuickQuestion } from './QuickQuestion'
-import posthog from 'posthog-js'
+import { analytics as posthog } from '../lib/analytics'
 
 interface DropResultProps {
   code: string

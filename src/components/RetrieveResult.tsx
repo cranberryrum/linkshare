@@ -6,6 +6,7 @@ import { CopyIcon } from './CopyIcon'
 import { ContentPreview, isUrlContent, toHref } from './ContentPreview'
 import posthog from 'posthog-js'
 import { getLinkMeta } from '../utils/linkMeta'
+import { QuickQuestion } from './QuickQuestion'
 
 interface RetrieveResultProps {
   content: string
@@ -97,6 +98,8 @@ export const RetrieveResult: React.FC<RetrieveResultProps> = ({
         <RotateCcw className="h-3.5 w-3.5" />
         Enter another code
       </button>
+
+      <QuickQuestion question="receive_sender" index={5} />
     </div>
   )
 }

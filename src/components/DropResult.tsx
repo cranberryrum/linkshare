@@ -5,6 +5,7 @@ import { useCountdown } from '../hooks/useCountdown'
 import { toast } from 'sonner'
 import { CopyIcon } from './CopyIcon'
 import { ContentPreview } from './ContentPreview'
+import { QuickQuestion } from './QuickQuestion'
 import posthog from 'posthog-js'
 
 interface DropResultProps {
@@ -174,6 +175,8 @@ export const DropResult: React.FC<DropResultProps> = ({
         <PlusCircle className="h-4 w-4 mr-2 shrink-0" />
         New Drop
       </button>
+
+      <QuickQuestion question="drop_audience" index={8} />
     </div>
   )
 }

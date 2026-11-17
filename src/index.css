@@ -51,7 +51,7 @@
   }
 
   .btn {
-    @apply rounded-xl px-6 py-3 font-medium border border-transparent;
+    @apply rounded-xl px-6 py-3 font-medium border border-transparent whitespace-nowrap;
     transition: transform 160ms var(--ease-out), filter 150ms ease, box-shadow 150ms ease;
   }
 
@@ -270,6 +270,36 @@
   transition: clip-path 220ms var(--ease-out);
 }
 
+/* Quick question: selected chip turns into a soft blue pill */
+.qq-chip-selected {
+  color: #3049E0;
+  background-color: #EEF1FF;
+  border-color: #C2CBFF;
+  box-shadow: none;
+}
+
+.qq-chip {
+  transition: transform 160ms var(--ease-out), background-color 150ms ease,
+    border-color 150ms ease, color 150ms ease, filter 150ms ease;
+}
+
+/* When finished or dismissed, the section folds away instead of vanishing */
+.qq-fold {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 280ms var(--ease-out), opacity 200ms ease;
+}
+
+.qq-fold > div {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.qq-fold.is-closing {
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+
 /* Expiry bar: draws in once on arrival, then drains linearly */
 .expiry-bar[data-intro='true'] {
   transition: transform 700ms var(--ease-out), background-color 300ms ease;
@@ -315,6 +345,10 @@
   .list-enter {
     animation-name: fadeIn;
     animation-duration: 200ms;
+  }
+
+  .qq-fold {
+    transition: opacity 200ms ease;
   }
 
   .seg-active-layer,

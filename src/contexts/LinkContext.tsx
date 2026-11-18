@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, Rea
 import { supabase } from '../lib/supabase'
 import { analytics as posthog } from '../lib/analytics'
 import { getLinkMeta } from '../utils/linkMeta'
+import { recordDrop, recordReceive } from '../lib/usage'
 
 interface Link {
   id: string
@@ -153,6 +154,7 @@ export const LinkProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const link = toLink(result as LinkRow, result.server_now, creatorId)
     writeTokens({ ...readTokens(), [link.id]: result.edit_token })
     setLinks(prev => ({ ...prev, [link.id]: link }))
+    recordDrop()
 
     posthog.capture('link_created', {
       code: link.id,
@@ -206,6 +208,7 @@ export const LinkProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     if (!isOwn) {
       setReceivedLinks(prev => ({ ...prev, [code]: link }))
+      recordReceive()
     }
     posthog.capture('link_retrieved', {
       code,

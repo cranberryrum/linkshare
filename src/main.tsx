@@ -6,10 +6,13 @@ import '@fontsource/jetbrains-mono/700.css'
 import App from './App.tsx'
 import { initAnalytics } from './lib/analytics'
 import { listenForInstallPrompt } from './lib/install'
+import { recordVisit } from './lib/usage'
 import { pageForPath } from './content/pages'
 import './index.css'
 
 listenForInstallPrompt()
+// Before the app runs, so a brand-new device is told apart from a returning one
+recordVisit()
 
 const root = document.getElementById('root')!
 const app = (

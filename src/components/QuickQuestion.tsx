@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { ArrowUp, Check, X } from 'lucide-react'
 import { analytics as posthog } from '../lib/analytics'
 import { supabase } from '../lib/supabase'
+import { buildAnswerContext } from '../lib/answerContext'
 
 // One-tap question shown under the content on the result screens.
 // Answers go to our own Supabase table (quick_answers). Each device sees each
@@ -91,7 +92,11 @@ export const QuickQuestion: React.FC<QuickQuestionProps> = ({ question, index })
     posthog.capture('quick_question_answered', { question, answer: choice })
     // Let the chip's selected state register before swapping to the note step
     setTimeout(() => setStep('note'), 220)
-    const { data } = await supabase.rpc('submit_quick_answer', { p_question: question, p_answer: choice })
+    const args = { p_question: question, p_answer: choice }
+    const context = await buildAnswerContext()
+    let { data, error } = await supabase.rpc('submit_quick_answer', { ...args, p_context: context })
+    // Database not migrated yet (older function without p_context): still save the answer
+    if (error) ({ data, error } = await supabase.rpc('submit_quick_answer', args))
     if (data?.id) answerId.current = data.id
   }
 

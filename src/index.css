@@ -173,6 +173,22 @@
   animation: scaleOut 150ms var(--ease-out) forwards;
 }
 
+/* On phones the Get the app popup is a bottom sheet: it slides, not scales */
+@keyframes sheetIn {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes sheetOut {
+  from { transform: translateY(0); }
+  to { transform: translateY(100%); }
+}
+
+@media (max-width: 639px) {
+  .sheet.animate-scale-in { animation: sheetIn 320ms var(--ease-out); }
+  .sheet.animate-scale-out { animation: sheetOut 200ms var(--ease-in-out) forwards; }
+}
+
 /* Copy -> Check icon swap, both icons stacked in the same box */
 .swap-icon {
   transition: opacity 150ms var(--ease-out), transform 150ms var(--ease-out);
@@ -333,6 +349,14 @@
   }
 
   .animate-scale-out {
+    animation-name: fadeOut;
+  }
+
+  .sheet.animate-scale-in {
+    animation-name: fadeIn;
+  }
+
+  .sheet.animate-scale-out {
     animation-name: fadeOut;
   }
 

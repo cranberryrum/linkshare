@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useLayoutEffect, useRef } from 'react'
-import { Send } from 'lucide-react'
+import { Send, Lock } from 'lucide-react'
 import { useLinks, InputMethod, ExpiryMinutes } from '../contexts/LinkContext'
 import { DropResult } from './DropResult'
 import { ActiveDrops } from './ActiveDrops'
@@ -148,7 +148,9 @@ export const DropForm: React.FC<{ incoming?: IncomingShare | null }> = ({ incomi
   }
 
   return (
-    <div className={`card p-6 w-full ${returned ? 'stagger-item' : ''}`}>
+    // The card sits on a tray; the tray's lip below carries the privacy note
+    <div className={`w-full rounded-2xl border border-gray-200 bg-[#EEF0F4] ${returned ? 'stagger-item' : ''}`}>
+    <div className="card -m-px p-6">
       <h2 className="text-lg font-semibold mb-6 text-gray-900">Drop a Link or Message</h2>
 
       <form onSubmit={handleSubmit}>
@@ -223,6 +225,11 @@ export const DropForm: React.FC<{ incoming?: IncomingShare | null }> = ({ incomi
       </form>
 
       <ActiveDrops showOnlyOwn />
+    </div>
+      <p className="flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs text-gray-500">
+        <Lock className="h-3 w-3 shrink-0" />
+        Deleted when it expires. No account, no history.
+      </p>
     </div>
   )
 }

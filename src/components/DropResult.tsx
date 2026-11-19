@@ -217,8 +217,8 @@ export const DropResult: React.FC<DropResultProps> = ({
 
     </div>
 
-    {/* Below the card, not inside it: easier to notice, never crowds the code */}
-    <QuickQuestion question="drop_audience" index={8} />
+    {/* Popup a moment after the code appears; it repeats the code so it's never hidden */}
+    <QuickQuestion question="drop_audience" delayMs={2000} code={code} />
     </>
   )
 }

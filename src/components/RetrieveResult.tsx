@@ -27,13 +27,19 @@ export const RetrieveResult: React.FC<RetrieveResultProps> = ({
   const [copied, setCopied] = useState(false)
   const copiedTimer = useRef<ReturnType<typeof setTimeout>>()
   const isUrl = isUrlContent(content)
+  // Copied or opened: the main job is done, so the quick question can show
+  const [acted, setActed] = useState(false)
 
   useEffect(() => () => clearTimeout(copiedTimer.current), [])
 
-  const trackOpen = () => posthog.capture('content_link_opened', { code, ...getLinkMeta(content) })
+  const trackOpen = () => {
+    posthog.capture('content_link_opened', { code, ...getLinkMeta(content) })
+    setActed(true)
+  }
 
   const copyContent = () => {
     posthog.capture('content_copied', { code, ...getLinkMeta(content) })
+    setActed(true)
     navigator.clipboard.writeText(content).then(() => {
       if ('vibrate' in navigator) {
         navigator.vibrate(5)
@@ -126,8 +132,9 @@ export const RetrieveResult: React.FC<RetrieveResultProps> = ({
 
     </div>
 
-    {/* Below the card, not inside it: easier to notice, never crowds the content */}
-    <QuickQuestion question="receive_sender" index={6} />
+    {/* Popup right after they copy or open it (so it's there when they come
+        back to this tab), or after a few seconds if they do neither */}
+    <QuickQuestion question="receive_sender" delayMs={4000} triggerNow={acted} />
     </>
   )
 }

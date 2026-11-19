@@ -17,6 +17,7 @@ export const RetrieveForm: React.FC<RetrieveFormProps> = ({ initialCode, onSendB
     content: string
     id: string
     expiresAt: number
+    oneView: boolean
   } | null>(null)
   const [error, setError] = useState('')
   const [returned, setReturned] = useState(false)
@@ -51,7 +52,7 @@ export const RetrieveForm: React.FC<RetrieveFormProps> = ({ initialCode, onSendB
         fail("That code doesn't exist. Check the digits and try again.")
         return
       }
-      setResult({ content: link.content, id: link.id, expiresAt: link.expiresAt })
+      setResult({ content: link.content, id: link.id, expiresAt: link.expiresAt, oneView: link.oneView })
       setCode('')
     } catch (err) {
       fail(err instanceof Error ? err.message : 'Failed to retrieve content')
@@ -73,6 +74,7 @@ export const RetrieveForm: React.FC<RetrieveFormProps> = ({ initialCode, onSendB
           content={result.content}
           code={result.id}
           expiresAt={result.expiresAt}
+          oneView={result.oneView}
           onReset={handleReset}
           onSendBack={onSendBack}
         />

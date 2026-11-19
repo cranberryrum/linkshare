@@ -11,16 +11,19 @@ interface Link {
   expiresAt: number // in this device's clock (corrected for clock skew)
   createdAt: number
   creatorId: string
+  oneView: boolean // deleted on Linkshare as soon as it's opened once
 }
 
 export type InputMethod = 'pasted' | 'typed' | 'share_target' | 'shortcut' | 'bookmarklet'
 export type RetrieveVia = 'qr_link' | 'typed'
 export type ExpiryMinutes = 10 | 60 | 1440
+// 'once' = one-view link: deleted when first opened, or after a day if not
+export type Expiry = ExpiryMinutes | 'once'
 
 interface LinkContextType {
   links: Record<string, Link>
   receivedLinks: Record<string, Link>
-  dropLink: (content: string, inputMethod?: InputMethod, minutes?: ExpiryMinutes) => Promise<Link>
+  dropLink: (content: string, inputMethod?: InputMethod, expiry?: Expiry) => Promise<Link>
   getLink: (code: string, via?: RetrieveVia) => Promise<Link | null>
   deleteLink: (code: string) => Promise<void>
   updateLink: (code: string, content: string) => Promise<Link | null>
@@ -34,6 +37,7 @@ interface LinkRow {
   content: string
   created_at: string
   expires_at: string
+  one_view?: boolean
 }
 
 interface RpcResult extends Partial<LinkRow> {
@@ -74,7 +78,8 @@ const toLink = (row: LinkRow, serverNow: string | undefined, creatorId: string):
   content: row.content,
   expiresAt: toLocalTime(row.expires_at, serverNow),
   createdAt: toLocalTime(row.created_at, serverNow),
-  creatorId
+  creatorId,
+  oneView: row.one_view === true
 })
 
 const callRpc = async (fn: string, args: Record<string, unknown>): Promise<RpcResult> => {
@@ -82,6 +87,8 @@ const callRpc = async (fn: string, args: Record<string, unknown>): Promise<RpcRe
   // Database not migrated yet: the function doesn't take p_country. Retry
   // without it. Only on "function not found", so nothing is ever created twice.
   if (error?.code === 'PGRST202' && 'p_country' in args) {
+    // A one-view link must never quietly become a normal one
+    if ('p_one_view' in args) throw new Error('One-view links aren’t available yet. Pick a time instead.')
     const rest = { ...args }
     delete rest.p_country
     ;({ data, error } = await supabase.rpc(fn, rest))
@@ -103,6 +110,7 @@ const CREATE_ERRORS: Record<string, string> = {
 
 const LOOKUP_ERRORS: Record<string, string> = {
   expired: 'This link has expired. Ask for a new code.',
+  viewed: 'This was a one-view link and it’s already been opened. Ask for a new code.',
   rate_limited: 'Too many attempts from your network. Please wait a few minutes.'
 }
 
@@ -147,7 +155,7 @@ export const LinkProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const dropLink = async (
     content: string,
     inputMethod: InputMethod = 'typed',
-    minutes: ExpiryMinutes = 10
+    expiry: Expiry = 10
   ): Promise<Link> => {
     const activeLinks = Object.values(links).filter(link => link.expiresAt > Date.now())
     if (activeLinks.length >= 5) {
@@ -156,7 +164,16 @@ export const LinkProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     // Usually ready already (looked up after page load); never waits long
     const country = await getCountryQuickly(500)
-    const result = await callRpc('create_link', { p_content: content, p_minutes: minutes, p_country: country })
+    const oneView = expiry === 'once'
+    const minutes = oneView ? 1440 : expiry
+    // p_one_view is only sent when true, so normal drops keep working on a
+    // database that doesn't have one-view links yet
+    const result = await callRpc('create_link', {
+      p_content: content,
+      p_minutes: minutes,
+      p_country: country,
+      ...(oneView ? { p_one_view: true } : {})
+    })
     if (result.status !== 'ok' || !result.code || !result.edit_token) {
       throw new Error(CREATE_ERRORS[result.status] || 'Failed to create link')
     }
@@ -170,6 +187,7 @@ export const LinkProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       code: link.id,
       expires_at: result.expires_at,
       expiry_minutes: minutes,
+      one_view: oneView,
       input_method: inputMethod,
       active_drops: Object.keys(links).length + 1,
       ...getLinkMeta(content)

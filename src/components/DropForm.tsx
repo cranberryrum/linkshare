@@ -1,15 +1,16 @@
 import React, { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { Send, Lock } from 'lucide-react'
-import { useLinks, InputMethod, ExpiryMinutes } from '../contexts/LinkContext'
+import { useLinks, InputMethod, Expiry, ExpiryMinutes } from '../contexts/LinkContext'
 import { DropResult } from './DropResult'
 import { ActiveDrops } from './ActiveDrops'
 import { toast } from 'sonner'
 import type { IncomingShare } from '../utils/incomingShare'
 
-const EXPIRY_OPTIONS: { minutes: ExpiryMinutes; label: string }[] = [
-  { minutes: 10, label: '10 min' },
-  { minutes: 60, label: '1 hour' },
-  { minutes: 1440, label: '1 day' }
+const EXPIRY_OPTIONS: { value: Expiry; label: string }[] = [
+  { value: 10, label: '10 min' },
+  { value: 60, label: '1 hour' },
+  { value: 1440, label: '1 day' },
+  { value: 'once', label: '1 view' }
 ]
 
 const EXPIRY_KEY = 'expiryMinutes'
@@ -17,14 +18,16 @@ const EXPIRY_KEY = 'expiryMinutes'
 // useLayoutEffect warns during the build-time prerender; it only matters in the browser
 const useBrowserLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect
 
-// Clip the active layer to one third: left, middle or right
+// Clip the active layer to one quarter
 const EXPIRY_CLIP = [
-  'inset(0 66.667% 0 0 round 9999px)',
-  'inset(0 33.333% 0 33.333% round 9999px)',
-  'inset(0 0 0 66.667% round 9999px)'
+  'inset(0 75% 0 0 round 9999px)',
+  'inset(0 50% 0 25% round 9999px)',
+  'inset(0 25% 0 50% round 9999px)',
+  'inset(0 0 0 75% round 9999px)'
 ]
 
-// Remember the last choice on this device (falls back to 10 min)
+// Remember the last time choice on this device (falls back to 10 min).
+// "1 view" is never remembered, so a drop is never one-view by surprise.
 const readExpiry = (): ExpiryMinutes => {
   try {
     const saved = Number(localStorage.getItem(EXPIRY_KEY))
@@ -39,7 +42,7 @@ export const DropForm: React.FC<{ incoming?: IncomingShare | null }> = ({ incomi
   const [inputMethod, setInputMethod] = useState<InputMethod>('typed')
   // Start at the default so the first render matches the prerendered HTML,
   // then jump (without animating) to this device's saved choice.
-  const [expiry, setExpiry] = useState<ExpiryMinutes>(10)
+  const [expiry, setExpiry] = useState<Expiry>(10)
   const [expirySynced, setExpirySynced] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [returned, setReturned] = useState(false)
@@ -48,6 +51,7 @@ export const DropForm: React.FC<{ incoming?: IncomingShare | null }> = ({ incomi
     content: string
     createdAt: number
     expiresAt: number
+    oneView: boolean
   } | null>(null)
   const { dropLink, updateLink } = useLinks()
   const submitRef = useRef<HTMLButtonElement>(null)
@@ -68,9 +72,10 @@ export const DropForm: React.FC<{ incoming?: IncomingShare | null }> = ({ incomi
     return () => cancelAnimationFrame(frame)
   }, [])
 
-  const chooseExpiry = (minutes: ExpiryMinutes) => {
-    setExpiry(minutes)
-    try { localStorage.setItem(EXPIRY_KEY, String(minutes)) } catch { /* storage blocked */ }
+  const chooseExpiry = (value: Expiry) => {
+    setExpiry(value)
+    if (value === 'once') return
+    try { localStorage.setItem(EXPIRY_KEY, String(value satisfies ExpiryMinutes)) } catch { /* storage blocked */ }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -92,7 +97,8 @@ export const DropForm: React.FC<{ incoming?: IncomingShare | null }> = ({ incomi
         code: link.id,
         content: link.content,
         createdAt: link.createdAt,
-        expiresAt: link.expiresAt
+        expiresAt: link.expiresAt,
+        oneView: link.oneView
       })
       setContent('')
       setInputMethod('typed')
@@ -118,7 +124,8 @@ export const DropForm: React.FC<{ incoming?: IncomingShare | null }> = ({ incomi
           code: updatedLink.id,
           content: updatedLink.content,
           createdAt: updatedLink.createdAt,
-          expiresAt: updatedLink.expiresAt
+          expiresAt: updatedLink.expiresAt,
+          oneView: result.oneView
         })
         toast.success('Content updated successfully', {
           style: { background: '#dcfce7', borderColor: '#86efac' }
@@ -141,6 +148,7 @@ export const DropForm: React.FC<{ incoming?: IncomingShare | null }> = ({ incomi
         content={result.content}
         createdAt={result.createdAt}
         expiresAt={result.expiresAt}
+        oneView={result.oneView}
         onReset={() => { setResult(null); setReturned(true) }}
         onEdit={handleEdit}
       />
@@ -173,38 +181,39 @@ export const DropForm: React.FC<{ incoming?: IncomingShare | null }> = ({ incomi
           </div>
         </div>
 
-        <div className="mb-4 flex items-center justify-between gap-3">
+        {/* Label above the picker on phones (four options need the width), beside it on larger screens */}
+        <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
           <span className="text-sm text-gray-500" id="expiry-label">Expires after</span>
           <div
             role="radiogroup"
             aria-labelledby="expiry-label"
-            className="relative grid grid-cols-3 rounded-full bg-gray-100 p-1"
+            className="relative grid grid-cols-4 rounded-full bg-gray-100 p-1"
           >
             {EXPIRY_OPTIONS.map(option => (
               <button
-                key={option.minutes}
+                key={option.value}
                 type="button"
                 role="radio"
-                aria-checked={expiry === option.minutes}
-                onClick={() => chooseExpiry(option.minutes)}
-                className="relative w-16 rounded-full py-1.5 text-xs font-medium text-gray-500 transition-colors duration-150 hover:text-gray-700"
+                aria-checked={expiry === option.value}
+                onClick={() => chooseExpiry(option.value)}
+                className="relative rounded-full py-1.5 text-xs font-medium text-gray-500 transition-colors duration-150 hover:text-gray-700 sm:w-16"
               >
                 {option.label}
               </button>
             ))}
-            {/* Active layer: white pill + dark labels, clipped to the selected third */}
+            {/* Active layer: white pill + dark labels, clipped to the selected quarter */}
             <div
               aria-hidden
-              className="seg-active-layer pointer-events-none select-none absolute inset-1 grid grid-cols-3"
+              className="seg-active-layer pointer-events-none select-none absolute inset-1 grid grid-cols-4"
               style={{
-                clipPath: EXPIRY_CLIP[EXPIRY_OPTIONS.findIndex(o => o.minutes === expiry)],
+                clipPath: EXPIRY_CLIP[EXPIRY_OPTIONS.findIndex(o => o.value === expiry)],
                 ...(expirySynced ? {} : { transition: 'none' })
               }}
             >
               {EXPIRY_OPTIONS.map(option => (
                 <span
-                  key={option.minutes}
-                  className="flex w-16 items-center justify-center rounded-full bg-white py-1.5 text-xs font-medium text-gray-900 shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
+                  key={option.value}
+                  className="flex items-center justify-center rounded-full bg-white py-1.5 text-xs font-medium text-gray-900 shadow-[0_1px_2px_rgba(0,0,0,0.06)] sm:w-16"
                 >
                   {option.label}
                 </span>
@@ -212,6 +221,11 @@ export const DropForm: React.FC<{ incoming?: IncomingShare | null }> = ({ incomi
             </div>
           </div>
         </div>
+        {expiry === 'once' && (
+          <p className="tab-swap -mt-2 mb-4 text-xs text-gray-500">
+            Deleted as soon as it’s opened, or after a day if nobody opens it.
+          </p>
+        )}
 
         <button
           ref={submitRef}

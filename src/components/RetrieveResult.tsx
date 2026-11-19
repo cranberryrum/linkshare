@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { ExternalLink, RotateCcw, Reply } from 'lucide-react'
+import { ExternalLink, RotateCcw, Reply, EyeOff } from 'lucide-react'
 import { useCountdown } from '../hooks/useCountdown'
 import { toast } from 'sonner'
 import { CopyIcon } from './CopyIcon'
@@ -12,6 +12,7 @@ interface RetrieveResultProps {
   content: string
   code: string
   expiresAt: number
+  oneView?: boolean
   onReset: () => void
   onSendBack?: () => void
 }
@@ -20,6 +21,7 @@ export const RetrieveResult: React.FC<RetrieveResultProps> = ({
   content,
   code,
   expiresAt,
+  oneView = false,
   onReset,
   onSendBack
 }) => {
@@ -72,10 +74,18 @@ export const RetrieveResult: React.FC<RetrieveResultProps> = ({
     <div className="card p-6 w-full stagger-item" style={{ '--i': 0 } as React.CSSProperties}>
       <div className="flex items-baseline justify-between gap-3 mb-4 stagger-item" style={{ '--i': 1 } as React.CSSProperties}>
         <h2 className="text-lg font-semibold text-gray-900">Received</h2>
-        <span className={`text-xs tabular-nums ${isExpired ? 'text-red-500' : 'text-gray-500'}`}>
-          {isExpired ? 'Expired' : `Code ${code} · expires in ${label}`}
+        <span className={`text-xs tabular-nums ${isExpired && !oneView ? 'text-red-500' : 'text-gray-500'}`}>
+          {oneView ? `Code ${code} · one view` : isExpired ? 'Expired' : `Code ${code} · expires in ${label}`}
         </span>
       </div>
+
+      {/* It's gone from Linkshare now: make sure they keep it */}
+      {oneView && (
+        <p className="mb-3 flex items-start gap-2 rounded-xl bg-amber-50 px-3.5 py-2.5 text-xs text-amber-800 stagger-item" style={{ '--i': 1 } as React.CSSProperties}>
+          <EyeOff className="mt-px h-3.5 w-3.5 shrink-0" />
+          One-view link: it’s now deleted from Linkshare. Copy or open it before you leave this page.
+        </p>
+      )}
 
       <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 stagger-item" style={{ '--i': 2 } as React.CSSProperties}>
         <ContentPreview content={content} onLinkClick={trackOpen} />

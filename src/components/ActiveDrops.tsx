@@ -62,6 +62,7 @@ export const ActiveDrops: React.FC<ActiveDropsProps> = ({
           id={code}
           content={link.content}
           expiresAt={link.expiresAt}
+          oneView={link.oneView}
           onDelete={() => handleDelete(code)}
           showDelete={!showOnlyReceived}
           index={index}

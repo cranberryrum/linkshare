@@ -7,6 +7,7 @@ import App from './App.tsx'
 import { initAnalytics } from './lib/analytics'
 import { listenForInstallPrompt } from './lib/install'
 import { recordVisit } from './lib/usage'
+import { prefetchCountry } from './lib/geo'
 import { pageForPath } from './content/pages'
 import './index.css'
 
@@ -30,3 +31,4 @@ if (root.hasChildNodes()) {
 }
 
 initAnalytics()
+prefetchCountry()

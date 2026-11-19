@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { analytics as posthog } from '../lib/analytics'
 import { getLinkMeta } from '../utils/linkMeta'
 import { recordDrop, recordReceive } from '../lib/usage'
+import { getCountryQuickly } from '../lib/geo'
 
 interface Link {
   id: string
@@ -77,7 +78,14 @@ const toLink = (row: LinkRow, serverNow: string | undefined, creatorId: string):
 })
 
 const callRpc = async (fn: string, args: Record<string, unknown>): Promise<RpcResult> => {
-  const { data, error } = await supabase.rpc(fn, args)
+  let { data, error } = await supabase.rpc(fn, args)
+  // Database not migrated yet: the function doesn't take p_country. Retry
+  // without it. Only on "function not found", so nothing is ever created twice.
+  if (error?.code === 'PGRST202' && 'p_country' in args) {
+    const rest = { ...args }
+    delete rest.p_country
+    ;({ data, error } = await supabase.rpc(fn, rest))
+  }
   if (error || !data) {
     console.error(`Error calling ${fn}:`, error)
     throw new Error('Something went wrong. Please try again.')
@@ -146,7 +154,9 @@ export const LinkProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       throw new Error('Maximum limit of 5 active drops reached')
     }
 
-    const result = await callRpc('create_link', { p_content: content, p_minutes: minutes })
+    // Usually ready already (looked up after page load); never waits long
+    const country = await getCountryQuickly(500)
+    const result = await callRpc('create_link', { p_content: content, p_minutes: minutes, p_country: country })
     if (result.status !== 'ok' || !result.code || !result.edit_token) {
       throw new Error(CREATE_ERRORS[result.status] || 'Failed to create link')
     }

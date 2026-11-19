@@ -62,6 +62,16 @@ export const QuickQuestion: React.FC<QuickQuestionProps> = ({ question, index })
   const noteInput = useRef<HTMLInputElement>(null)
   const config = QUESTIONS[question]
 
+  // Record that the question was actually on screen, so "saw it but didn't
+  // answer" can be measured. Once per mount (the ref guards React's dev
+  // double-run).
+  const logged = useRef(false)
+  useEffect(() => {
+    if (!visible || logged.current) return
+    logged.current = true
+    posthog.capture('quick_question_shown', { question })
+  }, [visible, question])
+
   // After "thanks", fold the section away
   useEffect(() => {
     if (step !== 'thanks') return

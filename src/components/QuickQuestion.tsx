@@ -62,14 +62,25 @@ export const QuickQuestion: React.FC<QuickQuestionProps> = ({ question, index })
   const noteInput = useRef<HTMLInputElement>(null)
   const config = QUESTIONS[question]
 
-  // Record that the question was actually on screen, so "saw it but didn't
-  // answer" can be measured. Once per mount (the ref guards React's dev
-  // double-run).
+  // Record that the question was actually seen: at least half of it on
+  // screen, not just added below the fold. Once per mount (the ref also
+  // guards React's dev double-run).
+  const cardRef = useRef<HTMLDivElement>(null)
   const logged = useRef(false)
   useEffect(() => {
-    if (!visible || logged.current) return
-    logged.current = true
-    posthog.capture('quick_question_shown', { question })
+    const el = cardRef.current
+    if (!visible || logged.current || !el) return
+    const log = () => {
+      if (logged.current) return
+      logged.current = true
+      posthog.capture('quick_question_shown', { question })
+    }
+    if (!('IntersectionObserver' in window)) { log(); return }
+    const observer = new IntersectionObserver(entries => {
+      if (entries.some(e => e.isIntersecting)) { log(); observer.disconnect() }
+    }, { threshold: 0.5 })
+    observer.observe(el)
+    return () => observer.disconnect()
   }, [visible, question])
 
   // After "thanks", fold the section away
@@ -134,7 +145,7 @@ export const QuickQuestion: React.FC<QuickQuestionProps> = ({ question, index })
     >
       <div>
         <div className="pt-3">
-          <div className="card px-5 py-4">
+          <div ref={cardRef} className="card px-5 py-4">
           {step === 'ask' && (
             <div className="tab-swap">
               <div className="flex items-center justify-between gap-3">

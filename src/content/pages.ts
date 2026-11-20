@@ -1,3 +1,4 @@
+import { comparisonPages } from './comparisons'
 // Every indexable page on the site. The build prerenders one HTML file per
 // entry (scripts/prerender.mjs) and the app picks the page from the URL.
 // Keep claims here true to how the product actually works.
@@ -7,21 +8,32 @@ export interface Faq {
   a: string
 }
 
+// Side-by-side for /vs/ pages. Keep every claim about the other product
+// fair and checkable; say where it's the better choice.
+export interface Comparison {
+  them: string // the other product's name, as people search for it
+  rows: { feature: string; linkshare: string; them: string }[]
+  useThemWhen: string
+  useLinkshareWhen: string
+}
+
 export interface Page {
+  kind?: 'use-case' | 'comparison' // default: use-case
+  navLabel?: string // short label for links from other pages (defaults to h1)
+  comparison?: Comparison
   slug: string // '' for the home page
   path: string // URL path, always with a trailing slash
   title: string // <title>, ~60 characters max
   description: string // meta description, ~155 characters max
   h1: string
   intro: string
-  // Short label used when other pages link here
   steps: { title: string; body: string }[]
   stepsHeading: string
   faqs: Faq[]
 }
 
 // Answers every page shares, after its own questions
-const COMMON_FAQS: Faq[] = [
+export const COMMON_FAQS: Faq[] = [
   {
     q: 'Do I need an account or an app?',
     a: 'No. Linkshare works in any web browser on any phone, tablet or computer. There is nothing to install and no sign-up.'
@@ -59,9 +71,9 @@ export const PAGES: Page[] = [
   {
     slug: '',
     path: '/',
-    title: 'Share Links Between Devices with a 4-Digit Code | Linkshare',
+    title: 'Share Links Online Between Devices, No Login | Linkshare',
     description:
-      'Send a link or text from one device to another with a 4-digit code. Works in any browser, no sign-up, no app. Codes last 10 minutes to a day.',
+      'Share links and text online between any two devices with a 4-digit code. Works in any browser: no sign-up, no app. Codes last 10 minutes to a day.',
     h1: 'Share a link between any two devices',
     intro: 'Drop it here, get a 4-digit code, type it on the other device. No sign-up, no app.',
     stepsHeading: 'How it works',
@@ -179,6 +191,9 @@ export const PAGES: Page[] = [
 ]
 
 export const HOME = PAGES[0]
+
+// Comparison pages live in their own file to keep this one readable
+PAGES.push(...comparisonPages(COMMON_FAQS))
 
 export const SITE_URL = 'https://linkshare.live'
 

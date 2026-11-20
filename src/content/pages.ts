@@ -28,7 +28,7 @@ const COMMON_FAQS: Faq[] = [
   },
   {
     q: 'How long does a code last?',
-    a: 'You choose when you drop it: 10 minutes, 1 hour or 1 day. When the timer runs out the code stops working and the content is wiped.'
+    a: 'You choose when you drop it: 10 minutes, 1 hour, 1 day, or one view, which deletes it the moment it’s opened. When the time runs out the code stops working and the content is wiped.'
   },
   {
     q: 'Is it private?',
@@ -47,7 +47,7 @@ const HOME_STEPS = [
   },
   {
     title: 'Get a code',
-    body: 'You get a 4-digit code and a QR code that last 10 minutes, 1 hour or 1 day.'
+    body: 'You get a 4-digit code and a QR code that last 10 minutes, 1 hour, 1 day, or for one view only.'
   },
   {
     title: 'Receive it',
@@ -85,7 +85,7 @@ export const PAGES: Page[] = [
       },
       {
         title: 'Note the code',
-        body: 'You’ll see a 4-digit code. It stays valid for as long as you chose: 10 minutes, 1 hour or 1 day.'
+        body: 'You’ll see a 4-digit code. It stays valid for as long as you chose: 10 minutes, 1 hour, 1 day, or until it’s opened once.'
       },
       {
         title: 'On your computer',

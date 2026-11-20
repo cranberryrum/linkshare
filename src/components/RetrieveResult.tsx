@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { ExternalLink, RotateCcw, Reply } from 'lucide-react'
+import { ExternalLink, RotateCcw, Reply, EyeOff } from 'lucide-react'
 import { useCountdown } from '../hooks/useCountdown'
 import { toast } from 'sonner'
 import { CopyIcon } from './CopyIcon'
@@ -12,6 +12,7 @@ interface RetrieveResultProps {
   content: string
   code: string
   expiresAt: number
+  oneView?: boolean
   onReset: () => void
   onSendBack?: () => void
 }
@@ -20,6 +21,7 @@ export const RetrieveResult: React.FC<RetrieveResultProps> = ({
   content,
   code,
   expiresAt,
+  oneView = false,
   onReset,
   onSendBack
 }) => {
@@ -27,13 +29,19 @@ export const RetrieveResult: React.FC<RetrieveResultProps> = ({
   const [copied, setCopied] = useState(false)
   const copiedTimer = useRef<ReturnType<typeof setTimeout>>()
   const isUrl = isUrlContent(content)
+  // Copied or opened: the main job is done, so the quick question can show
+  const [acted, setActed] = useState(false)
 
   useEffect(() => () => clearTimeout(copiedTimer.current), [])
 
-  const trackOpen = () => posthog.capture('content_link_opened', { code, ...getLinkMeta(content) })
+  const trackOpen = () => {
+    posthog.capture('content_link_opened', { code, ...getLinkMeta(content) })
+    setActed(true)
+  }
 
   const copyContent = () => {
     posthog.capture('content_copied', { code, ...getLinkMeta(content) })
+    setActed(true)
     navigator.clipboard.writeText(content).then(() => {
       if ('vibrate' in navigator) {
         navigator.vibrate(5)
@@ -66,10 +74,18 @@ export const RetrieveResult: React.FC<RetrieveResultProps> = ({
     <div className="card p-6 w-full stagger-item" style={{ '--i': 0 } as React.CSSProperties}>
       <div className="flex items-baseline justify-between gap-3 mb-4 stagger-item" style={{ '--i': 1 } as React.CSSProperties}>
         <h2 className="text-lg font-semibold text-gray-900">Received</h2>
-        <span className={`text-xs tabular-nums ${isExpired ? 'text-red-500' : 'text-gray-500'}`}>
-          {isExpired ? 'Expired' : `Code ${code} · expires in ${label}`}
+        <span className={`text-xs tabular-nums ${isExpired && !oneView ? 'text-red-500' : 'text-gray-500'}`}>
+          {oneView ? `Code ${code} · one view` : isExpired ? 'Expired' : `Code ${code} · expires in ${label}`}
         </span>
       </div>
+
+      {/* It's gone from Linkshare now: make sure they keep it */}
+      {oneView && (
+        <p className="mb-3 flex items-start gap-2 rounded-xl bg-amber-50 px-3.5 py-2.5 text-xs text-amber-800 stagger-item" style={{ '--i': 1 } as React.CSSProperties}>
+          <EyeOff className="mt-px h-3.5 w-3.5 shrink-0" />
+          One-view link: it’s now deleted from Linkshare. Copy or open it before you leave this page.
+        </p>
+      )}
 
       <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 stagger-item" style={{ '--i': 2 } as React.CSSProperties}>
         <ContentPreview content={content} onLinkClick={trackOpen} />
@@ -126,8 +142,9 @@ export const RetrieveResult: React.FC<RetrieveResultProps> = ({
 
     </div>
 
-    {/* Below the card, not inside it: easier to notice, never crowds the content */}
-    <QuickQuestion question="receive_sender" index={6} />
+    {/* Popup right after they copy or open it (so it's there when they come
+        back to this tab), or after a few seconds if they do neither */}
+    <QuickQuestion question="receive_sender" delayMs={4000} triggerNow={acted} />
     </>
   )
 }

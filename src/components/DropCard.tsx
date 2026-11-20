@@ -8,6 +8,7 @@ interface DropCardProps {
   id: string
   content: string
   expiresAt: number
+  oneView?: boolean
   onDelete: () => Promise<boolean>
   showDelete?: boolean
   index?: number
@@ -17,6 +18,7 @@ export const DropCard: React.FC<DropCardProps> = ({
   id,
   content,
   expiresAt,
+  oneView = false,
   onDelete,
   showDelete = false,
   index = 0
@@ -79,7 +81,7 @@ export const DropCard: React.FC<DropCardProps> = ({
             </div>
             <p className="text-sm text-app-text-secondary truncate mb-1">{content}</p>
             <p className="text-xs text-app-text-secondary">
-              Expires in {label}
+              {oneView ? `1 view · or ${label}` : `Expires in ${label}`}
             </p>
           </div>
         </div>

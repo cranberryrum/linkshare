@@ -13,6 +13,7 @@ interface DropResultProps {
   content: string
   createdAt: number
   expiresAt: number
+  oneView?: boolean
   onReset: () => void
   onEdit: (content: string) => void
 }
@@ -22,6 +23,7 @@ export const DropResult: React.FC<DropResultProps> = ({
   content,
   createdAt,
   expiresAt,
+  oneView = false,
   onReset,
   onEdit
 }) => {
@@ -82,7 +84,9 @@ export const DropResult: React.FC<DropResultProps> = ({
   const shareCode = async () => {
     const mins = Math.max(1, Math.round((expiresAt - Date.now()) / 60_000))
     const left = mins < 60 ? `${mins} min` : `${Math.round(mins / 60)} hour${Math.round(mins / 60) === 1 ? '' : 's'}`
-    const text = `Here's something for you on Linkshare. Code ${code}, expires in ${left}.`
+    const text = oneView
+      ? `Here's something for you on Linkshare. Code ${code}. It can be opened once, then it's deleted.`
+      : `Here's something for you on Linkshare. Code ${code}, expires in ${left}.`
     if (navigator.share) {
       try {
         await navigator.share({ title: 'Linkshare code', text, url: qrValue })
@@ -144,7 +148,11 @@ export const DropResult: React.FC<DropResultProps> = ({
           />
         </div>
         <p className={`mt-2 text-xs tabular-nums ${isExpired ? 'text-red-500' : endingSoon ? 'text-amber-600' : 'text-gray-500'}`}>
-          {isExpired ? 'This code has expired' : `Expires in ${label}`}
+          {isExpired
+            ? 'This code has expired'
+            : oneView
+              ? `One view: deleted once it’s opened · otherwise in ${label}`
+              : `Expires in ${label}`}
         </p>
       </div>
 
@@ -217,8 +225,8 @@ export const DropResult: React.FC<DropResultProps> = ({
 
     </div>
 
-    {/* Below the card, not inside it: easier to notice, never crowds the code */}
-    <QuickQuestion question="drop_audience" index={8} />
+    {/* Popup a moment after the code appears; it repeats the code so it's never hidden */}
+    <QuickQuestion question="drop_audience" delayMs={2000} code={code} />
     </>
   )
 }

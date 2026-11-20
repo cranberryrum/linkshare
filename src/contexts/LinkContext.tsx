@@ -92,6 +92,11 @@ const callRpc = async (fn: string, args: Record<string, unknown>): Promise<RpcRe
     const rest = { ...args }
     delete rest.p_country
     ;({ data, error } = await supabase.rpc(fn, rest))
+  } else if (error?.code === 'PGRST202' && 'p_token' in args) {
+    // Database doesn't take the creator token yet: look the code up without it
+    const rest = { ...args }
+    delete rest.p_token
+    ;({ data, error } = await supabase.rpc(fn, rest))
   }
   if (error || !data) {
     console.error(`Error calling ${fn}:`, error)
@@ -221,7 +226,10 @@ export const LinkProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Returns null when the code doesn't exist; throws with a friendly message
   // when it expired or the network is rate limited.
   const getLink = useCallback(async (code: string, via: RetrieveVia = 'typed'): Promise<Link | null> => {
-    const result = await callRpc('get_link', { p_code: code })
+    // If this device made the link, prove it with the link's private token so
+    // looking at your own one-view link doesn't use it up
+    const token = readTokens()[code]
+    const result = await callRpc('get_link', token ? { p_code: code, p_token: token } : { p_code: code })
 
     if (result.status !== 'ok') {
       posthog.capture('link_retrieval_failed', { code, reason: result.status, via })
